@@ -27,7 +27,8 @@
 
 void ParseArgs(int argc, char *argv[]);
 void CreateInputMap(InputHandling::Input *pInput,
-                    ShelldokuPrinter::PrinterLogic *pPrinterLogic);
+                    ShelldokuPrinter::PrinterLogic *pPrinterLogic,
+                    AnsiPositioning* positioner);
 
 bool IS_RUNNING{true};
 void SetIsRunning(bool *pIsRunning, bool running) { *pIsRunning = running; }
@@ -36,7 +37,6 @@ int main(int argc, char *argv[]) {
 
   ParseArgs(argc, argv);
   const int size{9};
-  const int sectionSize{size / 3};
 
   // shelldokuPrinter::FillCout(size);
 
@@ -45,13 +45,16 @@ int main(int argc, char *argv[]) {
   // create queue object
   EventQueue eventQueue{};
 
-   ShelldokuPrinter::PrinterLogic printerLogic(static_cast<std::size_t>(size));
+  ShelldokuPrinter::PrinterLogic printerLogic(static_cast<std::size_t>(size));
+  
+  AnsiPositioning positioner{static_cast<int>(printerLogic.SectionSize())};
+
 
   // input is a dispacher object
   InputHandling::Input input{&eventQueue};
 
   // create input map
-  CreateInputMap(&input, &printerLogic);
+  CreateInputMap(&input, &printerLogic, &positioner);
 
   Sudoku sudoku(size);
   sudoku.GenerateSudoku();
@@ -92,16 +95,18 @@ void ParseArgs(int argc, char *argv[]) {
 }
 
 void CreateInputMap(InputHandling::Input *pInput,
-                    ShelldokuPrinter::PrinterLogic *pPrinterLogic) {
+                    ShelldokuPrinter::PrinterLogic *pPrinterLogic, AnsiPositioning* pPositioner) {
 
-  using intFunction = FunctionEvent<int>;
+  using intintArg = std::pair<int, int>;
+  using intintFunction = FunctionEvent<intintArg>;
   using strViewFunction = FunctionEvent<std::string_view>;
   using sudokuFunction = FunctionEvent<Sudoku::ValueLocation, int>;
   // clang-format off
-  pInput->AddKey(Ansi::ANSI_UP,     {KEY_UP,    std::make_shared<intFunction>(intFunction( EVENT_ID::MOVE, &Ansi::MoveUp,1))});
-  pInput->AddKey(Ansi::ANSI_DOWN,   {KEY_DOWN,  std::make_shared<intFunction>(intFunction( EVENT_ID::MOVE, &Ansi::MoveDown,1))});
-  pInput->AddKey(Ansi::ANSI_RIGHT,  {KEY_RIGHT, std::make_shared<intFunction>(intFunction( EVENT_ID::MOVE, &Ansi::MoveRight,1))});
-  pInput->AddKey(Ansi::ANSI_LEFT,   {KEY_LEFT,  std::make_shared<intFunction>(intFunction( EVENT_ID::MOVE, &Ansi::MoveLeft,1))});
+  auto positionerFunction = std::bind(&AnsiPositioning::UpdatePosition, pPositioner, std::placeholders::_1);
+  pInput->AddKey(Ansi::ANSI_UP,     {KEY_UP,    std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE,positionerFunction ,intintArg{0, -1}))});
+  pInput->AddKey(Ansi::ANSI_DOWN,   {KEY_DOWN,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{0,1}))});
+  pInput->AddKey(Ansi::ANSI_RIGHT,  {KEY_RIGHT, std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{1, 0}))});
+  pInput->AddKey(Ansi::ANSI_LEFT,   {KEY_LEFT,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{-1, 0}))});
 
   pInput->AddKey(Ansi::ANSI_ESCAPE, {KEY_ESC, std::make_shared<FunctionEvent<bool*, bool>>(FunctionEvent<bool*, bool>(EVENT_ID::STOP, &SetIsRunning, {&IS_RUNNING, false}))});
 

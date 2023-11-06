@@ -22,10 +22,8 @@ void EventQueue::HandleQueue(bool stallThread) {
     std::unique_lock<std::mutex> lock{waitForEventsMutex};
     queueWaitCond.wait(lock);
   }
-  
-  if (HasEvents()) {
-    PopEvent();
-  }
+
+  PopEvent();
 }
 
 void EventQueue::RegisterListener(Listener *pListener, const EventID eventId) {

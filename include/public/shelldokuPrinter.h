@@ -145,9 +145,11 @@ public:
   ~PrinterLogic() = default;
 
   void PrintSingle(const std::string_view &str);
-
+  const std::size_t SectionSize() const;
+  
 private:
   const std::size_t size;
+  const std::size_t sectionSize;
 };
 
 static void PrepareSudokuField(std::size_t size)

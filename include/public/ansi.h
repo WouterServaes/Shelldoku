@@ -31,16 +31,20 @@ static void BackToSaved() noexcept;
 static void Cleanup() noexcept;
 
 static void MoveUp(int l) noexcept {
-  std::cout << ANSI_ESCAPE << "[" << l << "A";
+  if(l > 0)
+    std::cout << ANSI_ESCAPE << "[" << l << "A";
 }
 static void MoveDown(int l) noexcept {
-  std::cout << ANSI_ESCAPE << "[" << l << "B";
+  if (l > 0)
+    std::cout << ANSI_ESCAPE << "[" << l << "B";
 }
 static void MoveRight(int l) noexcept {
-  std::cout << ANSI_ESCAPE << "[" << l << "C";
+  if(l >0 )
+    std::cout << ANSI_ESCAPE << "[" << l << "C";
 }
 static void MoveLeft(int l) noexcept {
-  std::cout << ANSI_ESCAPE << "[" << l << "D";
+  if(l > 0)
+    std::cout << ANSI_ESCAPE << "[" << l << "D";
 }
 
 static void GetCursorPosition(int &x, int &y) {
@@ -70,8 +74,12 @@ static void Cleanup() noexcept {
 
 class AnsiPositioning final {
 public:
-  void UpdatePosition() {}
+  AnsiPositioning(int sectionSize);
+  ~AnsiPositioning() = default;
+
+  void UpdatePosition(std::pair<int, int> pos);
 
 private:
-  std::tuple<int, int> CursorPosition{};
+  std::pair<int, int> cursorPosition;
+  const int sectionSize;
 };
