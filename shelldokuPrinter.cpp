@@ -1,6 +1,6 @@
 #include "include/public/shelldokuPrinter.h"
 
-using namespace shelldokuPrinter;
+using namespace ShelldokuPrinter;
 
 PrinterLogic::PrinterLogic(std::size_t size) : size(size) {}
 

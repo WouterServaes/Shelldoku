@@ -9,15 +9,16 @@
 #include <string_view>
 #include <vector>
 
-namespace shelldokuPrinter {
+namespace ShelldokuPrinter {
 
-static void FillCout(std::size_t size);
+static std::size_t FillCout(std::size_t size);
 static void PrintDividers(std::size_t size);
 static void PrintSudoku(const std::vector<int> &values, std::size_t size);
 static bool CoutFilled{false};
 static bool PrintSingle(const std::string_view &str);
+static void PrepareSudokuField(std::size_t size);
 
-static void FillCout(std::size_t size) {
+static std::size_t FillCout(std::size_t size) {
   for (int r{}; r++ < size;) {
     for (int c{}; c++ < size;) {
       std::cout << "x";
@@ -38,7 +39,8 @@ static void FillCout(std::size_t size) {
     }
   }
   CoutFilled = true;
-  Ansi::BackToSaved();
+  // 
+  return size + 2;
 }
 
 static void PrintDividers(std::size_t size) {
@@ -69,9 +71,6 @@ static void PrintDividers(std::size_t size) {
 }
 
 static void PrintSudoku(const std::vector<int> &values, std::size_t size) {
-  if (!CoutFilled)
-    FillCout(size);
-
   const std::size_t sectionSize{size / 3};
   std::size_t currentBigRow{};
   for (std::size_t idx{}; idx < size; idx++) {
@@ -136,6 +135,7 @@ static void PrintSudoku(const std::vector<int> &values, std::size_t size) {
 
   Ansi::BackToSaved();
   PrintDividers(size);
+  Ansi::BackToSaved();
 }
 
 class PrinterLogic final {
@@ -150,4 +150,15 @@ private:
   const std::size_t size;
 };
 
-}; // namespace shelldokuPrinter
+static void PrepareSudokuField(std::size_t size)
+{
+  std::cout << std::endl;
+  std::cout << std::endl;
+  auto sizeFromTop {FillCout(size)};
+  while(sizeFromTop--) {
+    Ansi::MoveUp();
+  }
+  Ansi::SaveCursorPos();
+}
+
+}; // namespace ShelldokuPrinter

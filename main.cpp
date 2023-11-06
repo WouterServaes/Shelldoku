@@ -27,7 +27,7 @@
 
 void ParseArgs(int argc, char *argv[]);
 void CreateInputMap(InputHandling::Input *pInput,
-                    shelldokuPrinter::PrinterLogic *pPrinterLogic);
+                    ShelldokuPrinter::PrinterLogic *pPrinterLogic);
 
 bool IS_RUNNING{true};
 void SetIsRunning(bool *pIsRunning, bool running) { *pIsRunning = running; }
@@ -38,15 +38,14 @@ int main(int argc, char *argv[]) {
   const int size{9};
   const int sectionSize{size / 3};
 
-  std::cout << std::endl;
-  std::cout << std::endl;
+  // shelldokuPrinter::FillCout(size);
 
-  Ansi::SaveCursorPos();
-
+  // Ansi::SaveCursorPos();
+  ShelldokuPrinter::PrepareSudokuField(size);
   // create queue object
   EventQueue eventQueue{};
 
-  shelldokuPrinter::PrinterLogic printerLogic(static_cast<std::size_t>(size));
+   ShelldokuPrinter::PrinterLogic printerLogic(static_cast<std::size_t>(size));
 
   // input is a dispacher object
   InputHandling::Input input{&eventQueue};
@@ -57,16 +56,16 @@ int main(int argc, char *argv[]) {
   Sudoku sudoku(size);
   sudoku.GenerateSudoku();
 
-  shelldokuPrinter::PrintSudoku(sudoku.getValues(), size);
+  ShelldokuPrinter::PrintSudoku(sudoku.getValues(), size);
 
   input.Init();
   input.StartInputHandler();
 
   while (IS_RUNNING) {
-
-    eventQueue.HandleQueue();
+    // Handle the input events, waits for events to continue
+    eventQueue.HandleQueue(true);
   }
-
+  std::cin.get();
   Ansi::MoveDown(5);
   Ansi::Cleanup();
   input.End();
@@ -93,7 +92,7 @@ void ParseArgs(int argc, char *argv[]) {
 }
 
 void CreateInputMap(InputHandling::Input *pInput,
-                    shelldokuPrinter::PrinterLogic *pPrinterLogic) {
+                    ShelldokuPrinter::PrinterLogic *pPrinterLogic) {
 
   using intFunction = FunctionEvent<int>;
   using strViewFunction = FunctionEvent<std::string_view>;
@@ -108,7 +107,7 @@ void CreateInputMap(InputHandling::Input *pInput,
 
   // use std::bind to create a function ptr to a member function
   // PrintSingle should be called from pPrinterLogic, with a single argument
-  auto printLogicFunction = std::bind(&shelldokuPrinter::PrinterLogic::PrintSingle, pPrinterLogic, std::placeholders::_1);
+  auto printLogicFunction = std::bind(&ShelldokuPrinter::PrinterLogic::PrintSingle, pPrinterLogic, std::placeholders::_1);
   pInput->AddKey("1", {KEY_1, std::make_shared<strViewFunction>(strViewFunction(EVENT_ID::PRINT, printLogicFunction, "1"))});
   pInput->AddKey("2", {KEY_2, std::make_shared<strViewFunction>(strViewFunction(EVENT_ID::PRINT, printLogicFunction, "2"))});
   pInput->AddKey("3", {KEY_3, std::make_shared<strViewFunction>(strViewFunction(EVENT_ID::PRINT, printLogicFunction, "3"))});

@@ -21,7 +21,7 @@ public:
   EventQueue &operator=(EventQueue &&) = delete;
 
   void PushEvent(std::shared_ptr<Event> pEvent);
-  void HandleQueue();
+  void HandleQueue(bool stallThread = false);
 
   bool HasListeners();
 
@@ -33,6 +33,7 @@ private:
   bool HasEvents();
   std::queue<std::shared_ptr<Event>> pEvents;
   std::mutex queueMutex;
+  std::mutex waitForEventsMutex;
   std::mutex listenerMutex;
   std::map<EventID, std::vector<Listener *>> pListeners;
   std::condition_variable queueWaitCond;

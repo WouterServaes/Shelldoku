@@ -8,15 +8,21 @@
 #include <vector>
 
 void EventQueue::PushEvent(std::shared_ptr<Event> pEvent) {
-  std::unique_lock<std::mutex> lock(queueMutex);
   if (!pEvents.empty()) {
     return;
   }
+  std::unique_lock<std::mutex> lock(queueMutex);
   pEvents.push(pEvent);
   queueWaitCond.notify_one();
+  std::unique_lock<std::mutex> lock2{waitForEventsMutex};
 }
 
-void EventQueue::HandleQueue() {
+void EventQueue::HandleQueue(bool stallThread) {
+  if(stallThread) {
+    std::unique_lock<std::mutex> lock{waitForEventsMutex};
+    queueWaitCond.wait(lock);
+  }
+  
   if (HasEvents()) {
     PopEvent();
   }
