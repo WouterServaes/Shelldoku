@@ -71,15 +71,3 @@ static void Cleanup() noexcept {
   std::cout.flush();
 }
 }; // namespace Ansi
-
-class AnsiPositioning final {
-public:
-  AnsiPositioning(int sectionSize);
-  ~AnsiPositioning() = default;
-
-  void UpdatePosition(std::pair<int, int> pos);
-
-private:
-  std::pair<int, int> cursorPosition;
-  const int sectionSize;
-};

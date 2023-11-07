@@ -5,6 +5,7 @@
 #include "include/public/input.h"
 #include "include/public/shelldokuPrinter.h"
 #include "include/public/sudoku.h"
+#include "include/public/sudokuMovement.h"
 
 #include <algorithm>
 #include <array>
@@ -28,7 +29,7 @@
 void ParseArgs(int argc, char *argv[]);
 void CreateInputMap(InputHandling::Input *pInput,
                     ShelldokuPrinter::PrinterLogic *pPrinterLogic,
-                    AnsiPositioning* positioner);
+                    SudokuMovement* positioner);
 
 bool IS_RUNNING{true};
 void SetIsRunning(bool *pIsRunning, bool running) { *pIsRunning = running; }
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]) {
 
   ShelldokuPrinter::PrinterLogic printerLogic(static_cast<std::size_t>(size));
   
-  AnsiPositioning positioner{static_cast<int>(printerLogic.SectionSize())};
+  SudokuMovement positioner{static_cast<int>(printerLogic.SectionSize())};
 
 
   // input is a dispacher object
@@ -95,14 +96,14 @@ void ParseArgs(int argc, char *argv[]) {
 }
 
 void CreateInputMap(InputHandling::Input *pInput,
-                    ShelldokuPrinter::PrinterLogic *pPrinterLogic, AnsiPositioning* pPositioner) {
+                    ShelldokuPrinter::PrinterLogic *pPrinterLogic, SudokuMovement* pPositioner) {
 
   using intintArg = std::pair<int, int>;
   using intintFunction = FunctionEvent<intintArg>;
   using strViewFunction = FunctionEvent<std::string_view>;
   using sudokuFunction = FunctionEvent<Sudoku::ValueLocation, int>;
   // clang-format off
-  auto positionerFunction = std::bind(&AnsiPositioning::UpdatePosition, pPositioner, std::placeholders::_1);
+  auto positionerFunction = std::bind(&SudokuMovement::UpdatePosition, pPositioner, std::placeholders::_1);
   pInput->AddKey(Ansi::ANSI_UP,     {KEY_UP,    std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE,positionerFunction ,intintArg{0, -1}))});
   pInput->AddKey(Ansi::ANSI_DOWN,   {KEY_DOWN,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{0,1}))});
   pInput->AddKey(Ansi::ANSI_RIGHT,  {KEY_RIGHT, std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{1, 0}))});
