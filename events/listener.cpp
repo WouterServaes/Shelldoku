@@ -1,6 +1,7 @@
 #include "include/public/listener.h"
 #include "include/public/eventQueue.h"
 #include "include/public/events.h"
+#include "../common/include/public/logger.h"
 #include <algorithm>
 #include <iostream>
 #include <memory>
@@ -11,5 +12,5 @@ void Listener::Listen(EventQueue *pEventQueue, const EventID eventId) {
 }
 
 void Listener::Notify(EventID eventId) {
-  std::cout << "Listener received event: " << eventId;
+  Log::Debug("Listener received event");
 }

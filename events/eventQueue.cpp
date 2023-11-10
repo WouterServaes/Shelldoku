@@ -17,6 +17,10 @@ void EventQueue::PushEvent(std::shared_ptr<Event> pEvent) {
   std::unique_lock<std::mutex> lock2{waitForEventsMutex};
 }
 
+void EventQueue::PushEvent(EventID id) {
+  PushEvent(std::shared_ptr<Event>(new Event(id)));
+}
+
 void EventQueue::HandleQueue(bool stallThread) {
   if(stallThread) {
     std::unique_lock<std::mutex> lock{waitForEventsMutex};

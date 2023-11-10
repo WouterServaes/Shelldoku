@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-
+#include "eventID.h"
 class EventQueue;
 class Event;
 
@@ -14,9 +14,10 @@ public:
   Dispatcher(Dispatcher &&) = delete;
   Dispatcher &operator=(const Dispatcher &) = delete;
   Dispatcher &operator=(Dispatcher &&) = delete;
-
+  // Dispatches event on the event queue
   void DispatchEvent(std::shared_ptr<Event> pEvent);
-
+  // Dispatches event on the event queue
+  void DispatchEvent(EventID id);
 private:
   EventQueue *const pEventQueue;
 };

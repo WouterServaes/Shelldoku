@@ -16,7 +16,6 @@
 #include <thread>
 #include <utility>
 
-class Event;
 class EventQueue;
 
 namespace InputHandling {
@@ -34,24 +33,27 @@ public:
   Input(EventQueue *pEventQueue, const KeyMapping &keymapping = KEYS);
   ~Input();
 
+  // Initializes the input listener
   bool Init();
+  // End the input listener, also called by destructor
   bool End();
-
+  // Adds a key string to a key code
   void AddKey(KeyString keyString, Key key);
+  // Returns the optional key code for a key string 
   std::optional<KeyCode> GetKeyCode(KeyString keyString) const noexcept;
-  // blocking
+  // blocking, listens for a key press
   [[nodiscard]] std::optional<KeyCode>
   GetKeyPressed(std::optional<char> &charValue, std::optional<int> &intValue);
 
-  // creates thread
+  // creates thread, listens to key inputs and dispatches events
   void StartInputHandler();
   // stops thread
   void StopInputHandler() noexcept;
 
 private:
-  // blocking
+  // blocking, helper that does the key input listening
   [[nodiscard]] std::optional<KeyString> GetKeyPressed();
-  // blocking while loop
+  // Runs a key input listening loop
   void HandleInput();
 
   termios oldTerm;

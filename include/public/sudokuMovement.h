@@ -1,13 +1,18 @@
 #pragma once
 #include <tuple>
+#include <utility>
 
 class SudokuMovement final {
 public:
-  SudokuMovement(int sectionSize);
+  SudokuMovement(unsigned int sectionSize);
   ~SudokuMovement() = default;
 
-  void UpdatePosition(std::pair<int, int> pos);
+  // Updates the position.
+  // Takes a direction
+  void UpdatePosition(std::pair<int, int> direction);
 
+  // Returns the X, Y position
+  [[nodiscard]] const std::pair<int, int> GetPosition() const noexcept;
 private:
   std::pair<int, int> cursorPosition;
   const int sectionSize;

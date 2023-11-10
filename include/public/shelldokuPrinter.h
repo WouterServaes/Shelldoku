@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ansi.h"
-
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -11,11 +10,18 @@
 
 namespace ShelldokuPrinter {
 
+// Fills the terminal with a placeholder sudoku board
 static std::size_t FillCout(std::size_t size);
+// Prints the line dividers
 static void PrintDividers(std::size_t size);
-static void PrintSudoku(const std::vector<int> &values, std::size_t size);
+// Prints the sudoku
+// None-existing vector values are printed as a space
+static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values, std::size_t size);
+// Flag indicating if cout is filled, should be replaced by some clean check
 static bool CoutFilled{false};
-static bool PrintSingle(const std::string_view &str);
+// Prints str and returns cursor to before printed str
+static void PrintSingle(const std::string_view &str);
+// Prepares the sudoku field, helper function
 static void PrepareSudokuField(std::size_t size);
 
 static std::size_t FillCout(std::size_t size) {
@@ -70,7 +76,7 @@ static void PrintDividers(std::size_t size) {
   }
 }
 
-static void PrintSudoku(const std::vector<int> &values, std::size_t size) {
+static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values, std::size_t size) {
   const std::size_t sectionSize{size / 3};
   std::size_t currentBigRow{};
   for (std::size_t idx{}; idx < size; idx++) {
@@ -92,7 +98,7 @@ static void PrintSudoku(const std::vector<int> &values, std::size_t size) {
 
     // print 9x9 block
     std::for_each_n(values.begin(), size,
-                    [&counter, sectionSize, &currentInnerRow](const int value) {
+                    [&counter, sectionSize, &currentInnerRow](std::optional<unsigned int> value) {
                       // Column and Row index of number in inner sudoku block
                       std::size_t innerColumn{counter % sectionSize};
                       std::size_t innerRow{static_cast<std::size_t>(
@@ -105,7 +111,8 @@ static void PrintSudoku(const std::vector<int> &values, std::size_t size) {
                       }
 
                       // print the number
-                      std::cout << (value >= 0 ? value : ' ');
+                      
+                      std::cout << (value.has_value() ? std::to_string(value.value()) : " ");
 
                       // Divider section, move to right is important for next
                       // 3x3 inner block. Easier to do this for every column,
@@ -138,19 +145,25 @@ static void PrintSudoku(const std::vector<int> &values, std::size_t size) {
   Ansi::BackToSaved();
 }
 
-class PrinterLogic final {
-public:
-  PrinterLogic() = delete;
-  PrinterLogic(std::size_t size);
-  ~PrinterLogic() = default;
+// class PrinterLogic final {
+// public:
+//   PrinterLogic() = delete;
+//   PrinterLogic(std::size_t size);
+//   ~PrinterLogic() = default;
 
-  void PrintSingle(const std::string_view &str);
-  const std::size_t SectionSize() const;
+//   void PrintSingle(const std::string_view &str);
+//   const std::size_t SectionSize() const;
   
-private:
-  const std::size_t size;
-  const std::size_t sectionSize;
-};
+// private:
+//   const std::size_t size;
+//   const std::size_t sectionSize;
+// };
+
+static void PrintSingle(const std::string_view &str)
+{
+  std::cout<<str;
+  Ansi::MoveLeft(str.size());
+}
 
 static void PrepareSudokuField(std::size_t size)
 {

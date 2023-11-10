@@ -20,14 +20,20 @@ const static std::string_view ANSI_UP{"\033[A"};
 const static std::string_view ANSI_DOWN{"\033[B"};
 const static std::string_view ANSI_RIGHT{"\033[C"};
 const static std::string_view ANSI_LEFT{"\033[D"};
-
+// Moves the cursor down some length
 static void MoveDown(int l = 1) noexcept;
+// Moves the cursor up some length
 static void MoveUp(int l = 1) noexcept;
+// Moves the cursor right some length
 static void MoveRight(int l = 1) noexcept;
+// Moves the cursor left some length
 static void MoveLeft(int l = 1) noexcept;
 
+// Saves the cursor using ANSI save code using terminal functionality
 static void SaveCursorPos() noexcept;
+// Returns the cursor to the last saved position (saved with SaveCursorPos())
 static void BackToSaved() noexcept;
+// Cleans up the terminal output of the program
 static void Cleanup() noexcept;
 
 static void MoveUp(int l) noexcept {

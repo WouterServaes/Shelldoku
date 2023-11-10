@@ -5,17 +5,31 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <utility>
+#include <optional>
+
+namespace EVENT_ID {
+static const unsigned int SUDOKU_PLACE = 4;
+}; // namespace EVENT_ID
 
 class Sudoku final {
 public:
+  // X Y location
   using ValueLocation = std::pair<std::size_t, std::size_t>;
+  //Sudoku values can be optional, empty
+  using SudokuValue = std::optional<unsigned int>;
+  // Every sudoku value can be locked
+  using LockableValue = std::pair<bool, SudokuValue>;
+  Sudoku() = delete;
   Sudoku(std::size_t size);
   ~Sudoku();
+  // Generates sudoku
   void GenerateSudoku();
-  [[nodiscard]] const std::vector<int> &getValues() const;
-  bool PlaceValue(ValueLocation location, int value);
-
+  // Returns copy of values
+  [[nodiscard]] const std::vector<SudokuValue> getValues() const;
+  bool PlaceValue(ValueLocation location, SudokuValue value);
+  [[nodiscard]] const std::size_t SectionSize() const { return size/3;}
 private:
   const std::size_t size;
-  std::vector<int> values;
+  std::vector<LockableValue> values;
 };

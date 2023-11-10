@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string>
 
-SudokuMovement::SudokuMovement(int sectionSize)
+SudokuMovement::SudokuMovement(unsigned int sectionSize)
 :cursorPosition({0,0}), sectionSize(sectionSize)
 {}
 
@@ -23,13 +23,13 @@ SudokuMovement::SudokuMovement(int sectionSize)
 // 7  │   │
 // 8  │   │
 
-void SudokuMovement::UpdatePosition(std::pair<int, int> pos)
+void SudokuMovement::UpdatePosition(std::pair<int, int> direction)
 {
-  cursorPosition.first += pos.first;
-  cursorPosition.second += pos.second;
+  cursorPosition.first += direction.first;
+  cursorPosition.second += direction.second;
 
-  int posX = pos.first;
-  int posY = pos.second;
+  int posX = direction.first;
+  int posY = direction.second;
 
   const std::pair dir{posX > 0, posY > 0};
 
@@ -57,4 +57,9 @@ void SudokuMovement::UpdatePosition(std::pair<int, int> pos)
     }
     dir.second ? Ansi::MoveDown(posY)  : Ansi::MoveUp(posY);
   }
+}
+
+[[nodiscard]] const std::pair<int, int> SudokuMovement::GetPosition() const noexcept
+{
+  return cursorPosition;
 }

@@ -1,6 +1,7 @@
 #include "include/public/sudoku.h"
 #include "include/public/shelldokuPrinter.h"
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <random>
 
@@ -30,17 +31,31 @@ void Sudoku::GenerateSudoku() {
     std::mt19937_64 g(rd());
 
     std::for_each_n(values.begin() + (idx * size), size,
-                    [&counter](int &value) { value = counter++; });
+                    [&counter](LockableValue &value) { value.second = counter++; value.first = true;});
 
     std::shuffle(values.begin() + (idx * size),
                  (values.begin() + (idx * size) + size), g);
   }
 }
 
-const std::vector<int> &Sudoku::getValues() const { return values; }
+const std::vector<Sudoku::SudokuValue> Sudoku::getValues() const 
+{
+      std::vector<SudokuValue> c;
+      c.resize(values.size());
+      auto cIt{c.begin()};
+      auto vIt{values.begin()};
+      for(;cIt != c.end() && vIt != values.end();cIt++, vIt++) {
+        *cIt = vIt->second;
+      }
+      return c;
+}
 
-bool Sudoku::PlaceValue(ValueLocation location, int value) {
+bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) {
   const auto idx{size * location.first + location.second};
-  values.at(idx) = value;
-  return true;
+  // Only place it if the value is not locked
+  if(!values.at(idx).first) {
+    values.at(idx).second = value;
+    return true;
+  }
+  return false;
 }
