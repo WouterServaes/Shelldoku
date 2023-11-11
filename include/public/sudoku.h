@@ -32,12 +32,27 @@ public:
   // Returns false on failure (value was not placed)
   bool PlaceValue(ValueLocation location, SudokuValue value);
   // Returns the sudoku section size
-  [[nodiscard]] const std::size_t SectionSize() const { return size / 3;}
+  [[nodiscard]] inline const std::size_t SectionSize() const { return size / 3;}
 private:
   void SolveSudoku();
+  // Returns the indexes of the peers of a given index if the given index is valid
+  // Peer (20 for a 9x9 sudoku): All values inside the square of the index, all horizontal values, all vertical values
+  [[nodiscard]] const std::optional<std::vector<std::size_t>> GetPeers(const std::size_t idx) const noexcept;
+  // Returns the indexes of the direct peers of a given index if the given index is valid
+  // Direct Peer (8 for a 9x9 sudoku): All values inside the square of the index, excluding the given idx
+  [[nodiscard]] const std::optional<std::vector<std::size_t>> GetDirectPeers(const std::size_t idx) const noexcept;
+  // Returns the square index of the given index if the given index is valid
+  [[nodiscard]] const std::optional<std::size_t> GetSquareIndex(const std::size_t idx) const noexcept;
+  // Returns the first value index of the given square if the given square index is valid
+  [[nodiscard]] const std::optional<std::size_t> GetIndexOfSquare(const std::size_t squareIdx) const noexcept;
+  
   [[nodiscard]] inline const std::size_t InputToSudokuPos(ValueLocation inputPos) const noexcept {
-    return size * inputPos.first * inputPos.second;
+    return size * inputPos.second + inputPos.first;
   } 
+  [[nodiscard]] inline const ValueLocation SudokuPosToInput(std::size_t idx) const noexcept {
+    return {idx % size, idx / size};
+  }
+
   const std::size_t size;
   std::vector<LockableValue> values;
 };
