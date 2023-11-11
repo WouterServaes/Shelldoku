@@ -5,9 +5,10 @@
 #include <cmath>
 #include <cstddef>
 #include <iostream>
+#include <string>
 #include <string_view>
 #include <vector>
-
+#include "../../common/include/public/logger.h"
 namespace ShelldokuPrinter {
 
 // Fills the terminal with a placeholder sudoku board
@@ -78,86 +79,30 @@ static void PrintDividers(std::size_t size) {
 
 static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values, std::size_t size) {
   const std::size_t sectionSize{size / 3};
-  std::size_t currentBigRow{};
-  for (std::size_t idx{}; idx < size; idx++) {
-    std::size_t blockIdx{(idx % sectionSize) * sectionSize};
-
-    // inner block number counter
-    std::size_t counter{};
-    // row index of number inside the 3x3 block
-    std::size_t currentInnerRow{};
-    // row index of the 3x3 blocks
-    std::size_t row{static_cast<std::size_t>(std::floor(idx / sectionSize))};
-
-    // Move cursor to the next row of 3x3 blocks when the last grid on a row
-    // is complete
-    if (currentBigRow != row && row != 0) {
-      Ansi::MoveDown(4);
-      currentBigRow = row;
+  
+  for(std::size_t idx{}; idx < values.size(); idx++) {
+    // vertical spaces
+    if(idx > 0 && !(idx % sectionSize) && (idx % size)) {
+      Ansi::MoveRight();
+    } 
+    // horizontal spacer
+    if(idx > 0 && !(idx % (size * sectionSize))) {
+      Ansi::MoveDown();
     }
-
-    // print 9x9 block
-    std::for_each_n(values.begin(), size,
-                    [&counter, sectionSize, &currentInnerRow](std::optional<unsigned int> value) {
-                      // Column and Row index of number in inner sudoku block
-                      std::size_t innerColumn{counter % sectionSize};
-                      std::size_t innerRow{static_cast<std::size_t>(
-                          std::floor(counter / sectionSize))};
-
-                      // Move cursor down when the number should be on a new row
-                      if (currentInnerRow != innerRow && innerRow != 0) {
-                        Ansi::MoveDown(1);
-                        currentInnerRow = innerRow;
-                      }
-
-                      // print the number
-                      
-                      std::cout << (value.has_value() ? std::to_string(value.value()) : " ");
-
-                      // Divider section, move to right is important for next
-                      // 3x3 inner block. Easier to do this for every column,
-                      // but not required.
-                      if (innerColumn == sectionSize - 1) {
-                        Ansi::MoveRight(1);
-                      }
-
-                      // Reset cursor to left of inner block when row is filled
-                      if (innerColumn == sectionSize - 1) {
-                        Ansi::MoveLeft(sectionSize + 1);
-                      }
-
-                      counter++;
-                    });
-
-    // Set cursor to top left of next block
-    Ansi::MoveRight(sectionSize + 1);
-    Ansi::MoveUp(sectionSize - 1);
-
-    // Move cursor back to the left when the last grid on a row is complete
-    std::size_t column{idx % sectionSize};
-    if (column == sectionSize - 1) {
-      Ansi::MoveLeft((sectionSize + 1) * 3);
+    // enters afters every row
+    if(idx > 0 && !(idx % size)) {
+      Ansi::MoveDown();
+      Ansi::MoveLeft(size + sectionSize);
     }
+    // value printing
+    const auto v{values[idx]};
+    std::cout << (v.has_value() ? std::to_string(v.value()) :" ");
   }
 
   Ansi::BackToSaved();
   PrintDividers(size);
   Ansi::BackToSaved();
 }
-
-// class PrinterLogic final {
-// public:
-//   PrinterLogic() = delete;
-//   PrinterLogic(std::size_t size);
-//   ~PrinterLogic() = default;
-
-//   void PrintSingle(const std::string_view &str);
-//   const std::size_t SectionSize() const;
-  
-// private:
-//   const std::size_t size;
-//   const std::size_t sectionSize;
-// };
 
 static void PrintSingle(const std::string_view &str)
 {

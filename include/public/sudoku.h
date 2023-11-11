@@ -35,7 +35,9 @@ public:
   [[nodiscard]] const std::size_t SectionSize() const { return size / 3;}
 private:
   void SolveSudoku();
-  [[nodiscard]] const std::size_t ScreenToWorldPos(ValueLocation gridPos) const noexcept; 
+  [[nodiscard]] inline const std::size_t InputToSudokuPos(ValueLocation inputPos) const noexcept {
+    return size * inputPos.first * inputPos.second;
+  } 
   const std::size_t size;
   std::vector<LockableValue> values;
 };
