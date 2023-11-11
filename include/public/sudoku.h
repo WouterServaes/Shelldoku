@@ -27,9 +27,15 @@ public:
   void GenerateSudoku();
   // Returns copy of values
   [[nodiscard]] const std::vector<SudokuValue> getValues() const;
+  // Tries to place a value on a location
+  // Returns true on success (value was placed)
+  // Returns false on failure (value was not placed)
   bool PlaceValue(ValueLocation location, SudokuValue value);
-  [[nodiscard]] const std::size_t SectionSize() const { return size/3;}
+  // Returns the sudoku section size
+  [[nodiscard]] const std::size_t SectionSize() const { return size / 3;}
 private:
+  void SolveSudoku();
+  [[nodiscard]] const std::size_t ScreenToWorldPos(ValueLocation gridPos) const noexcept; 
   const std::size_t size;
   std::vector<LockableValue> values;
 };
