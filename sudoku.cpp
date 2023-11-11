@@ -1,4 +1,5 @@
 #include "include/public/sudoku.h"
+#include "common/include/public/logger.h"
 #include "include/public/shelldokuPrinter.h"
 #include <algorithm>
 #include <cstddef>
@@ -7,6 +8,7 @@
 #include <random>
 #include <math.h>
 #include <string>
+#include <vector>
 //https://norvig.com/sudoku.html
 
 // layout
@@ -50,21 +52,18 @@ void Sudoku::GenerateSudoku() {
     //              (values.begin() + (idx * size) + size), g);
   }
 
-  for(int idx{}; idx < values.size(); idx++) {
-    const auto p{GetDirectPeers(idx)};
+  const auto p {GetPeers(17)};
+  // for(int idx{}; idx < values.size(); idx++) {
+  //   const auto p{GetPeers(idx)};
+
     if(p.has_value()) {
-      Log::Debug((std::to_string(idx) + " " 
-      + std::to_string(p.value()[0]) + " "
-      + std::to_string(p.value()[1]) + " "
-      + std::to_string(p.value()[2]) + " " 
-      + std::to_string(p.value()[3]) + " "
-      + std::to_string(p.value()[4]) + " "
-      + std::to_string(p.value()[5]) + " "
-      + std::to_string(p.value()[6]) + " "
-      + std::to_string(p.value()[7]) + " "
-      ).c_str());
+      std::string str;
+      for(int i{};i<p->size();i++){
+        str += std::to_string(p.value()[i]) + " ";
+      }
+      Log::Debug((std::to_string(17) + ": " + str).c_str());
     }
-  }
+  // }
 }
 
 const std::vector<Sudoku::SudokuValue> Sudoku::getValues() const 
@@ -96,15 +95,52 @@ void Sudoku::SolveSudoku()
 
 const std::optional<std::vector<std::size_t>> Sudoku::GetPeers(const std::size_t idx) const noexcept
 {
-  if(idx > 0 && idx < values.size()) {
-    const auto xy{SudokuPosToInput(idx)};
-    const auto directPeers{GetDirectPeers(idx)};
-    // for 9x9 sudoku: 8 horizontal, 8 vertical, 4 left in the square excluding the hor/vert
-    const std::size_t peersCount{((size - 1) * 2) + (size - 1 - 4)};
-    
+  if(idx < 0 || idx >= values.size()) {
+    return {};
+  }
+  
+  const auto xy{SudokuPosToInput(idx)};
+  const auto directPeers{GetDirectPeers(idx)};
+
+  if(!directPeers.has_value())
+    return {};
+
+  // for 9x9 sudoku: 8 horizontal, 8 vertical, 4 left in the square excluding the hor/vert
+  const std::size_t peersCount{((size - 1) * 2) + (size - 1 - 4)};
+  std::vector<std::size_t> horPeers{};
+  std::vector<std::size_t> vertPeers{};
+  
+  for(int peerIdx{}; peerIdx < size; peerIdx++) {
+    auto p{InputToSudokuPos({peerIdx, xy.second})};
+    if(p != idx)
+     horPeers.push_back(p);
+
+    p = InputToSudokuPos({xy.first, peerIdx}) ;
+    if(p != idx)
+      vertPeers.push_back(p);
   }
 
-  return {};
+  std::vector<std::size_t> r{};
+  // insert all found values in return vector
+  r.insert(r.end(), horPeers.begin(), horPeers.end());
+  r.insert(r.end(), vertPeers.begin(), vertPeers.end());
+
+  // Inserting the optional vector does not work for some reason?
+  //r.insert(r.end(), directPeers.value().begin(), directPeers.value().begin());
+  
+  for(auto dp: directPeers.value()) {
+    r.push_back(dp);
+  }
+
+  //remove duplicates
+  std::sort(r.begin(), r.end());
+  r.erase( std::unique( r.begin(), r.end() ), r.end());
+
+  if(r.size() != peersCount) {
+    Log::Debug(("Peers size not expected: " + std::to_string(r.size())).c_str());
+  }
+
+  return r;
 }
 
 const std::optional<std::vector<std::size_t>> Sudoku::GetDirectPeers(const std::size_t idx) const noexcept
