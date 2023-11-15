@@ -9,13 +9,12 @@
 // see logs in journalctl -f | grep Shelldoku
 
 namespace Log {
-  template <typename ...T>
+  
   static void Debug(const char* str) {
     sd_journal_send("PRIORITY=%d", LOG_DEBUG, "SYSLOG_IDENTIFIER=%s","Shelldoku", "MESSAGE=%s", str, NULL);
   }  
 
-  // template <typename ...T>
-  // static void Info(const char* str, T... v) {
-  //   sd_journal_print(LOG_INFO, str, v...);
-  // }  
+  static void Debug(const std::string& str) {
+    Debug(str.c_str());
+  }
 }
