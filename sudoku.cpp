@@ -113,8 +113,8 @@ bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value)
   Log::Debug(std::string(std::string("l:") + std::to_string(location.first) + ","+std::to_string(location.second) + " or " + std::to_string(XYToSudokuPos(size, location))));
   // Only place it if the value is not locked and if it can be placed
   if(!values.at(XYToSudokuPos(size, location)).first
-  || !values.at(XYToSudokuPos(size, location)).second.has_value()
-  || CanPlaceValue(values, location, value)
+  && !values.at(XYToSudokuPos(size, location)).second.has_value()
+  && CanPlaceValue(values, location, value)
   ) {
     values.at(XYToSudokuPos(size, location)).second = value;
     return true;
@@ -159,3 +159,9 @@ void Sudoku::Solve()
     Log::Debug("can't be solved");
   }
 }
+
+void Sudoku::Start()
+{
+  pSudokuSolver->PrepareSudoku(GetValues());
+}
+

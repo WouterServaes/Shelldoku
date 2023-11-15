@@ -16,6 +16,8 @@ class SudokuSolver
     [[nodiscard]] virtual bool CanBePlaced(const std::vector<SudokuValue>& values, ValueLocation location, SudokuValue value) const noexcept = 0;
     // Valides the correctness of the sudoku values
     [[nodiscard]] virtual bool ValidateSudoku(const std::vector<SudokuValue>& values) noexcept = 0;
+    // Prepares the solver for a continuous game
+    virtual void PrepareSudoku(const std::vector<SudokuValue>& values) noexcept = 0;
   protected:
     const std::size_t size;
     const std::size_t sectionSize;
@@ -31,6 +33,7 @@ class SudokuSolver_bitmasks final: public SudokuSolver
     [[nodiscard]] bool CanBePlaced(const std::vector<SudokuValue>& values, ValueLocation location, SudokuValue value) const noexcept override;
     [[nodiscard]] bool ValidateSudoku(const std::vector<SudokuValue>& values) noexcept override;
     [[nodiscard]] bool CanBeSolved(const std::vector<SudokuValue>& values) noexcept override;
+    void PrepareSudoku(const std::vector<SudokuValue>& values) noexcept override;
   private:
     [[nodiscard]] bool Solve(std::vector<SudokuValue>& values, ValueLocation location);
     // Generates the initial bitmask value according to given values

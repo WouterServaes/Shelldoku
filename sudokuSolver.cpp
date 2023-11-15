@@ -43,15 +43,15 @@ bool SudokuSolver_bitmasks::CanBePlaced(const std::vector<SudokuValue>& values, 
       && !((bitMasksSquares[XYToSquareIndex(size, sectionSize, location).value()] >> value.value()) & 1);
 }
 
+void SudokuSolver_bitmasks::PrepareSudoku(const std::vector<SudokuValue>& values) noexcept
+{
+  ClearBitMasks();
+  GenerateBitMasks(values);
+}
+
 void SudokuSolver_bitmasks::GenerateBitMasks(const std::vector<SudokuValue>& toGenerateFrom)
 {
-  if(GeneratedBitMasks()) {
-    return;
-  }
-
-  bitMasksRows.clear();
-  bitMasksColumns.clear();
-  bitMasksSquares.clear();
+  ClearBitMasks();
 
   bitMasksRows.resize(size);
   bitMasksColumns.resize(size);
@@ -147,6 +147,7 @@ bool SudokuSolver_bitmasks::Solve(std::vector<SudokuValue>& values, ValueLocatio
 
 bool SudokuSolver_bitmasks::ValidateSudoku(const std::vector<SudokuValue>& values) noexcept 
 {
+  ClearBitMasks();
   GenerateBitMasks(values);
   auto cV{values};
 

@@ -84,8 +84,7 @@ int main(int argc, char *argv[]) {
   } else {
     Log::Debug("can NOT be solved");
   }
-  sudoku.Solve();
-  
+  sudoku.Start();
   ShelldokuPrinter::PrintSudoku(sudoku.GetValues(), size);
 
   while (IS_RUNNING) {

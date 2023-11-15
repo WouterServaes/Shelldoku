@@ -35,7 +35,8 @@ public:
   [[nodiscard]] bool IsSolvable() noexcept;
   // Solves the sudoku
   void Solve();
-
+  // Start for continuous solving with user input
+  void Start();
 private:
   // Sets values to Lockable values vector
   void SetValues(const std::vector<SudokuValue> values);
