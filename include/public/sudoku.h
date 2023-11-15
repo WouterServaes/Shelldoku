@@ -30,7 +30,6 @@ public:
 
   // Tries to place a value on a location
   // Returns true on success (value was placed)
-  // Returns false on failure (value was not placed)
   bool PlaceValue(ValueLocation location, SudokuValue value);
   // Returns true if sudoku is solvable
   [[nodiscard]] bool IsSolvable() noexcept;
@@ -40,15 +39,12 @@ public:
 private:
   // Sets values to Lockable values vector
   void SetValues(const std::vector<SudokuValue> values);
-  
+
   // Returns true if value can be placed on location
   [[nodiscard]] bool CanPlaceValue(const std::vector<LockableValue>& toPlace, ValueLocation location, SudokuValue value) const noexcept;
 
-  // [[nodiscard]] bool ValidateEntireSudoku(const std::vector<LockableValue>& toValidate) const noexcept;
-  // [[nodiscard]] bool ValidateValue(const std::vector<LockableValue>& toValidate, ValueLocation location, SudokuValue value) const noexcept;
   // Returns true if sudoku is solved
   [[nodiscard]] bool IsSolved(const std::vector<LockableValue>& toCheck) const noexcept;
-
 
   const std::size_t size;
   std::vector<LockableValue> values;

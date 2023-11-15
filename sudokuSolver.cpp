@@ -13,7 +13,7 @@ bool SudokuSolver::CanBeSolved(const std::vector<SudokuValue>& values) noexcept{
 }
 
 //==================
-//SudokuSolver_bitmasks
+// SudokuSolver_bitmasks
 ///==============
 
 SudokuSolver_bitmasks::SudokuSolver_bitmasks(const std::size_t size, const std::size_t sectionSize)
