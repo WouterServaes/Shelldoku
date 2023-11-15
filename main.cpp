@@ -8,7 +8,7 @@
 #include "include/public/shelldokuPrinter.h"
 #include "include/public/sudoku.h"
 #include "include/public/sudokuMovement.h"
-
+#include "include/public/sudokuSolver.h"
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -56,7 +56,8 @@ int main(int argc, char *argv[]) {
   
   //Sudoku sudoku(size, {4,{},{},{},{},{},8,{},5,{},3,{},{},{},{},{},{},{},{},{},{},7,{},{},{},{},{},{},2,{},{},{},{},{},6,{},{},{},{},{},8,{},4,{},{},{},{},{},{},1,{},{},{},{},{},{},{},6,{},3,{},7,{},5,{},{},2,{},{},{},{},{},1,{},4,{},{},{},{},{},{}});
   
-  Sudoku sudoku{size, {3, 0, 6, 5, 0, 8, 4, 0, 0,
+  Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new SudokuSolver_bitmasks(size, size/3)),{
+  3, 0, 6, 5, 0, 8, 4, 0, 0,
   5, 2, 0, 0, 0, 0, 0, 0, 0,
   0, 8, 7, 0, 0, 0, 0, 3, 1,
   0, 0, 3, 0, 1, 0, 0, 8, 0,
@@ -72,24 +73,26 @@ int main(int argc, char *argv[]) {
   // create input map
   CreateInputMap(&input, &sudoku, &positioner, &eventQueue);
 
-  ShelldokuPrinter::PrintSudoku(sudoku.getValues(), size);
+  ShelldokuPrinter::PrintSudoku(sudoku.GetValues(), size);
 
   input.Init();
   input.StartInputHandler();
 
-
   if(sudoku.IsSolvable()) {
     Log::Debug("can be solved");
-    //sudoku.Solve();
+    
   } else {
     Log::Debug("can NOT be solved");
   }
-ShelldokuPrinter::PrintSudoku(sudoku.getValues(), size);
+  sudoku.Solve();
+  
+  ShelldokuPrinter::PrintSudoku(sudoku.GetValues(), size);
 
   while (IS_RUNNING) {
     // Handle the input events, waits for events to continue
     eventQueue.HandleQueue(true);
   }
+
   std::cin.get();
   Ansi::MoveDown(5);
   Ansi::Cleanup();
