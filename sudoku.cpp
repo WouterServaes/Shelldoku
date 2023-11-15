@@ -40,7 +40,39 @@
 Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver) 
 : size(_size), pSudokuSolver(std::move(_pSudokuSolver))
 {
-  values.reserve(size * size); 
+  values.resize(size * size);
+  const auto sectionSize{SectionSize()};
+  for (int idx{}; idx < size; idx++) {
+    int counter{1};
+
+    std::for_each_n(values.begin() + (idx * size), size,
+      [&counter, idx, sectionSize](LockableValue &value)  {
+        // 1 2 3
+        value.second = ((counter - 1) % sectionSize) + 1; 
+        // increase 1 2 3 by 3 according to row
+        value.second.value() += (idx % sectionSize) * sectionSize;
+        counter++;
+        value.first = false;
+    });
+  }
+  //   for(unsigned int r{}; r < size; r++) {
+  //   for(unsigned int c{}; c < size; c++) {
+  //     // const auto value = values.at(XYToSudokuPos(size, {c,r}));
+  //     // const auto v = (value.second? value.second.value() : 0);
+  //     Log::Debug((
+  //       "r" + std::to_string(r) 
+  //     + " c" + std::to_string(c)
+  //     + " idx" + std::to_string(XYToSudokuPos(size, {c,r})) 
+  //     + " xy" + std::to_string(SudokuPosToXY(size, XYToSudokuPos(size, {c,r})).first) 
+  //     + "," + std::to_string(SudokuPosToXY(size, XYToSudokuPos(size, {c,r})).second) 
+  //     + " sqrIdx" + std::to_string(SudokuPosSquareIndex(size, SectionSize(), XYToSudokuPos(size, {c,r})).value())
+  //     + " sqrIdx" + std::to_string(XYToSquareIndex(size, SectionSize(), {c,r}).value())
+  //     + " sqrP " + std::to_string(GetIndexOfSquare(size, SectionSize(), XYToSquareIndex(size, SectionSize(), {c,r}).value()).value())
+      
+  //     //+ ": "+std::to_string(v))
+  //     ).c_str());
+  //   }
+  // }
 }
 
 Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver, std::vector<SudokuValue> _values)
@@ -52,40 +84,32 @@ Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver, 
     }
     values.emplace_back(LockableValue{v.has_value(), v});
   }
-  // for(unsigned int r{}; r < size; r++) {
-  //   for(unsigned int c{}; c < size; c++) {
-  //     const auto value = values.at(XYToSudokuPos(size, {c,r}));
-  //     const auto v = (value.second? value.second.value() : 0);
-  //     Log::Debug((
-  //       "r" + std::to_string(r) 
-  //     + " c" + std::to_string(c)
-  //     + " idx" + std::to_string(XYToSudokuPos(size, {c,r})) 
-  //     + " xy" + std::to_string(SudokuPosToXY(size, XYToSudokuPos(size, {c,r})).first) 
-  //     + "," + std::to_string(SudokuPosToXY(size, XYToSudokuPos(size, {c,r})).second) 
-  //     + " sqrIdx" + std::to_string(SudokuPosSquareIndex(size, SectionSize(), XYToSudokuPos(size, {c,r})).value())
-  //     + " sqrIdx" + std::to_string(XYToSquareIndex(size, SectionSize(), {c,r}).value())
-  //     + " sqrP " + std::to_string(GetIndexOfSquare(size, SectionSize(), XYToSquareIndex(size, SectionSize(), {c,r}).value()).value())
-      
-  //     + ": "+std::to_string(v)).c_str());
-  //   }
-  // }
 }
 
 Sudoku::~Sudoku() {}
 
 void Sudoku::GenerateSudoku() {
-  values.resize(size * size);
+  do {
+    Shuffle();
+  } while(!pSudokuSolver->ValidateSudoku(GetValues()));
+}
 
+void Sudoku::Shuffle()
+{
   std::random_device rd;
   std::mt19937_64 g(rd());
-  for (int idx{}; idx < size; idx++) {
-    int counter{1};
 
-    std::for_each_n(values.begin() + (idx * size), size,
-                    [&counter](LockableValue &value) { value.second = counter++; value.first = false;});
-    // std::shuffle(values.begin() + (idx * size),
-    //              (values.begin() + (idx * size) + size), g);
-  }
+  for(int squareIdx{}; squareIdx < size; squareIdx++) {
+    auto idxs{GetAllIndexesOfSquare(size, SectionSize(), squareIdx)};
+    const auto originalIdxs{idxs};
+    std::shuffle(idxs.begin(), idxs.end(), g);
+    for(int idx{}; idx < idxs.size(); idx++) {
+      auto v1{values[originalIdxs[idx]]};
+      auto v2{values[idxs[idx]]};
+      values[originalIdxs[idx]] = v2;
+      values[idxs[idx]] = v1;
+    }
+  }  
 }
 
 const std::vector<SudokuValue> Sudoku::GetValues() const 

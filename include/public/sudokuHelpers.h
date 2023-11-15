@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <tuple>
+#include <vector>
 
 // X Y location
 using X = std::size_t;
@@ -57,6 +58,30 @@ using LockableValue = std::pair<bool, SudokuValue>;
   // = 33
   // <first square of "squareIdx" row from top> - (<corresponds to the amount of square to backtrack to reach the first in the square> * <2:because this is how it works> * <section size, to actually reach the first value in the section/square>) 
   return {(squareIdx * size) - (((squareIdx % sectionSize) * 2) * sectionSize)};
+}
+
+[[nodiscard]] static const std::vector<std::size_t> GetAllIndexesOfSquare(const std::size_t size, const std::size_t sectionSize, const std::size_t squareIdx)
+{
+  auto idxOfSqr{GetIndexOfSquare(size, sectionSize, squareIdx)};
+  if(!idxOfSqr.has_value()) {
+    return {};
+  }
+  std::vector<std::size_t> allIndexes;
+  allIndexes.resize(size);
+
+  int r{0};
+  for(int idx{}; idx < size; idx++) {
+    // base index
+    allIndexes[idx] = idxOfSqr.value();
+    // move column
+    allIndexes[idx] += (idx % sectionSize);
+    // move row
+    if(idx && !(idx % sectionSize)) {
+      r++;
+    }
+    allIndexes[idx] +=  r * size;
+  }
+  return allIndexes;
 }
 
 // static void ValidatePositionConverterFunctions() {

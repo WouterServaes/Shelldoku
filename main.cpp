@@ -31,7 +31,12 @@
 #include <thread>
 #include <vector>
 
-void ParseArgs(int argc, char *argv[]);
+struct ArgOptions{
+  unsigned int size{9};
+  bool generate{false};
+};
+
+[[nodiscard]] ArgOptions ParseArgs(int argc, char *argv[]);
 void CreateInputMap(InputHandling::Input *pInput,
                     Sudoku* pSudoku,
                     SudokuMovement* pPositioner, EventQueue* pEventQueue);
@@ -41,8 +46,8 @@ void SetIsRunning(bool *pIsRunning, bool running) { *pIsRunning = running; }
 
 int main(int argc, char *argv[]) {
 
-  ParseArgs(argc, argv);
-  const int size{9};
+  const auto options{ParseArgs(argc, argv)};
+  const unsigned int size{options.size};
 
   ShelldokuPrinter::PrepareSudokuField(size);
   
@@ -57,17 +62,20 @@ int main(int argc, char *argv[]) {
   
   //Sudoku sudoku(size, {4,{},{},{},{},{},8,{},5,{},3,{},{},{},{},{},{},{},{},{},{},7,{},{},{},{},{},{},2,{},{},{},{},{},6,{},{},{},{},{},8,{},4,{},{},{},{},{},{},1,{},{},{},{},{},{},{},6,{},3,{},7,{},5,{},{},2,{},{},{},{},{},1,{},4,{},{},{},{},{},{}});
   
-  Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new SudokuSolver_bitmasks(size, size/3)),{
-  3, 0, 6, 5, 0, 8, 4, 0, 0,
-  5, 2, 0, 0, 0, 0, 0, 0, 0,
-  0, 8, 7, 0, 0, 0, 0, 3, 1,
-  0, 0, 3, 0, 1, 0, 0, 8, 0,
-  9, 0, 0, 8, 6, 3, 0, 0, 5,
-  0, 5, 0, 0, 9, 0, 6, 0, 0,
-  1, 3, 0, 0, 0, 0, 2, 5, 0,
-  0, 0, 0, 0, 0, 0, 0, 7, 4,
-  0, 0, 5, 2, 0, 6, 3, 0, 0}};
-  //sudoku.GenerateSudoku();
+  // Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new SudokuSolver_bitmasks(size, size/3)),{
+  // 3, 0, 6, 5, 0, 8, 4, 0, 0,
+  // 5, 2, 0, 0, 0, 0, 0, 0, 0,
+  // 0, 8, 7, 0, 0, 0, 0, 3, 1,
+  // 0, 0, 3, 0, 1, 0, 0, 8, 0,
+  // 9, 0, 0, 8, 6, 3, 0, 0, 5,
+  // 0, 5, 0, 0, 9, 0, 6, 0, 0,
+  // 1, 3, 0, 0, 0, 0, 2, 5, 0,
+  // 0, 0, 0, 0, 0, 0, 0, 7, 4,
+  // 0, 0, 5, 2, 0, 6, 3, 0, 0}};
+  Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new SudokuSolver_bitmasks(size, size / 3))};
+  if(options.generate) {
+    sudoku.GenerateSudoku();
+  }
 
   SudokuMovement positioner{static_cast<unsigned int>(sudoku.SectionSize())};
 
@@ -100,23 +108,30 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void ParseArgs(int argc, char *argv[]) {
+ArgOptions ParseArgs(int argc, char *argv[]) {
   int opt{};
-
+  ArgOptions settings{};
   static struct option long_options[] = {{"help", no_argument, 0, 0},
-                                         {"size", required_argument, 0, 0}};
+                                         {"size", required_argument, 0, 9},
+                                        {"generate", no_argument, 0, false}};
   int option_index{};
-  while ((opt = getopt_long(argc, argv, "hs:", long_options, &option_index)) !=
+  while ((opt = getopt_long(argc, argv, "hs:g", long_options, &option_index)) !=
          -1) {
     switch (opt) {
     case 'h':
       std::cout << "HELP" << std::endl;
       break;
     case 's':
-      std::cout << optarg << " NOT USED" << std::endl;
+      std::cout << " -S <> NOT USED" << std::endl;
+      settings.size = std::stoi(optarg);
+
       break;
+    case 'g':
+      settings.generate = true;
     }
   }
+
+  return settings;
 }
 
 void CreateInputMap(InputHandling::Input *pInput,

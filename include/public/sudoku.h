@@ -53,6 +53,8 @@ private:
   // Returns true if sudoku is solved
   [[nodiscard]] bool IsSolved(const std::vector<LockableValue>& toCheck) const noexcept;
 
+  void Shuffle();
+
   const std::size_t size;
   std::vector<LockableValue> values;
   std::unique_ptr<SudokuSolver> pSudokuSolver;
