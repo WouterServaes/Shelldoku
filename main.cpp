@@ -126,13 +126,15 @@ void CreateInputMap(InputHandling::Input *pInput,
   using intintFunction = FunctionEvent<intintArg>;
   using sudokuFunction = FunctionEvent<int>;
   // clang-format off
-  auto positionerFunction = std::bind(&SudokuMovement::UpdatePosition, pPositioner, std::placeholders::_1);
+  auto positionerFunction{std::bind(&SudokuMovement::UpdatePosition, pPositioner, std::placeholders::_1)};
   pInput->AddKey(Ansi::ANSI_UP,     {KEY_UP,    std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE,positionerFunction ,intintArg{0, -1}))});
   pInput->AddKey(Ansi::ANSI_DOWN,   {KEY_DOWN,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{0,1}))});
   pInput->AddKey(Ansi::ANSI_RIGHT,  {KEY_RIGHT, std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{1, 0}))});
   pInput->AddKey(Ansi::ANSI_LEFT,   {KEY_LEFT,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{-1, 0}))});
 
-  pInput->AddKey(Ansi::ANSI_ESCAPE, {KEY_ESC, std::make_shared<FunctionEvent<bool*, bool>>(FunctionEvent<bool*, bool>(EVENT_ID::STOP, &SetIsRunning, {&IS_RUNNING, false}))});
+  auto quitFunction{std::make_shared<FunctionEvent<bool*, bool>>(FunctionEvent<bool*, bool>(EVENT_ID::STOP, &SetIsRunning, {&IS_RUNNING, false}))};
+  pInput->AddKey(Ansi::ANSI_ESCAPE, {KEY_ESC, quitFunction});
+  pInput->AddKey("Q", {KEY_Q, quitFunction});
 
   // use std::bind to create a function ptr to a member function
   // PrintSingle should be called from pPrinterLogic, with a single argument
