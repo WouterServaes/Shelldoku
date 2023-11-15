@@ -39,7 +39,9 @@
 
 Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver) 
 : size(_size), pSudokuSolver(std::move(_pSudokuSolver))
-{ values.reserve(size * size); }
+{
+  values.reserve(size * size); 
+}
 
 Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver, std::vector<SudokuValue> _values)
 : size(_size), pSudokuSolver(std::move(_pSudokuSolver))
@@ -50,7 +52,6 @@ Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver, 
     }
     values.emplace_back(LockableValue{v.has_value(), v});
   }
-
   // for(unsigned int r{}; r < size; r++) {
   //   for(unsigned int c{}; c < size; c++) {
   //     const auto value = values.at(XYToSudokuPos(size, {c,r}));
@@ -110,7 +111,6 @@ void Sudoku::SetValues(const std::vector<SudokuValue> _values)
 
 bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) 
 {
-  Log::Debug(std::string(std::string("l:") + std::to_string(location.first) + ","+std::to_string(location.second) + " or " + std::to_string(XYToSudokuPos(size, location))));
   // Only place it if the value is not locked and if it can be placed
   if(!values.at(XYToSudokuPos(size, location)).first
   && !values.at(XYToSudokuPos(size, location)).second.has_value()

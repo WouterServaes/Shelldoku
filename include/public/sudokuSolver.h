@@ -14,7 +14,7 @@ class SudokuSolver
     [[nodiscard]] virtual bool CanBeSolved(const std::vector<SudokuValue>& values) noexcept;
     // Returns true if the values can be placed on a location in values
     [[nodiscard]] virtual bool CanBePlaced(const std::vector<SudokuValue>& values, ValueLocation location, SudokuValue value) const noexcept = 0;
-    // Valides the correctness of the sudoku values
+    // Validates the correctness of the sudoku values
     [[nodiscard]] virtual bool ValidateSudoku(const std::vector<SudokuValue>& values) noexcept = 0;
     // Prepares the solver for a continuous game
     virtual void PrepareSudoku(const std::vector<SudokuValue>& values) noexcept = 0;

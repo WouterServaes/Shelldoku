@@ -61,5 +61,6 @@ void SudokuMovement::UpdatePosition(std::pair<int, int> direction)
 
 [[nodiscard]] const std::pair<int, int> SudokuMovement::GetPosition() const noexcept
 {
+  //Log::Debug(std::string("position:") + std::to_string(cursorPosition.first) + ", " + std::to_string(cursorPosition.second));
   return cursorPosition;
 }

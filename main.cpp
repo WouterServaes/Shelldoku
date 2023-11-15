@@ -51,8 +51,8 @@ int main(int argc, char *argv[]) {
   // input is a dispacher object
   InputHandling::Input input{&eventQueue};
 
-  Listener test{};
-  test.Listen(&eventQueue, EVENT_ID::SUDOKU_PLACE);
+  //Listener test{};
+  //test.Listen(&eventQueue, EVENT_ID::SUDOKU_PLACE);
   
   //Sudoku sudoku(size, {4,{},{},{},{},{},8,{},5,{},3,{},{},{},{},{},{},{},{},{},{},7,{},{},{},{},{},{},2,{},{},{},{},{},6,{},{},{},{},{},8,{},4,{},{},{},{},{},{},1,{},{},{},{},{},{},{},6,{},3,{},7,{},5,{},{},2,{},{},{},{},{},1,{},4,{},{},{},{},{},{}});
   

@@ -12,5 +12,5 @@ void Listener::Listen(EventQueue *pEventQueue, const EventID eventId) {
 }
 
 void Listener::Notify(EventID eventId) {
-  Log::Debug("Listener received event");
+  //Log::Debug("Listener received event");
 }
