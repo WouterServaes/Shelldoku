@@ -1,5 +1,6 @@
 
 #include "common/include/public/logger.h"
+#include "events/include/public/eventID.h"
 #include "events/include/public/eventQueue.h"
 #include "events/include/public/events.h"
 #include "events/include/public/listener.h"
@@ -157,6 +158,19 @@ void CreateInputMap(InputHandling::Input *pInput,
   pInput->AddKey("8", {KEY_8, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 8))});
   pInput->AddKey("9", {KEY_9, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 9))});
   pInput->AddKey("0", {KEY_0, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 0))});
+  
+  auto ready{[pSudoku, pEventQueue](){
+    Dispatcher dis(pEventQueue);
+    if(pSudoku->IsSolved()) {
+      dis.DispatchEvent(EVENT_ID::SUDOKU_SOLVED);
+      pSudoku->Stop();
+    } else {
+      dis.DispatchEvent(EVENT_ID::SUDOKU_FAIL);
+    }
+  }};
+
+  pInput->AddKey("R", {KEY_R, std::make_shared<FunctionEvent<>>(FunctionEvent<>(EVENT_ID::READY, ready))});
+
   // clang-format on
 
   // a Key should be able to have multiple events assigned;

@@ -11,7 +11,9 @@
 #include <optional>
 
 namespace EVENT_ID {
-static const unsigned int SUDOKU_PLACE = 4;
+static const unsigned int SUDOKU_PLACE = 5;
+static const unsigned int SUDOKU_SOLVED = 6;
+static const unsigned int SUDOKU_FAIL = 7;
 }; // namespace EVENT_ID
 
 class Sudoku final {
@@ -37,6 +39,10 @@ public:
   void Solve();
   // Start for continuous solving with user input
   void Start();
+  // Stop for continuous solving with user input, locks all values
+  void Stop();
+  // Returns true if the sudoku is solved
+  [[nodiscard]] bool IsSolved() const noexcept;
 private:
   // Sets values to Lockable values vector
   void SetValues(const std::vector<SudokuValue> values);

@@ -33,7 +33,7 @@ public:
   FunctionEvent() = delete;
   FunctionEvent(const EventID id,
                 std::function<void(FUNCTION_ARG_TYPES...)> function,
-                std::tuple<FUNCTION_ARG_TYPES...> functionArgs)
+                std::tuple<FUNCTION_ARG_TYPES...> functionArgs = {})
       : Event(id), function(function), functionArgs(functionArgs) {}
 
   ~FunctionEvent() = default;
@@ -44,3 +44,5 @@ private:
   const std::tuple<FUNCTION_ARG_TYPES...> functionArgs;
   std::function<void(FUNCTION_ARG_TYPES...)> function;
 };
+
+using SimpleFunction = FunctionEvent<>;

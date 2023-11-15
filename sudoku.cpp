@@ -111,11 +111,7 @@ void Sudoku::SetValues(const std::vector<SudokuValue> _values)
 
 bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) 
 {
-  // Only place it if the value is not locked and if it can be placed
-  if(!values.at(XYToSudokuPos(size, location)).first
-  && !values.at(XYToSudokuPos(size, location)).second.has_value()
-  && CanPlaceValue(values, location, value)
-  ) {
+  if(CanPlaceValue(values, location, value)) {
     values.at(XYToSudokuPos(size, location)).second = value;
     return true;
   }
@@ -131,14 +127,14 @@ bool Sudoku::IsSolvable() noexcept
 
 bool Sudoku::CanPlaceValue(const std::vector<LockableValue>& toPlaceOn, ValueLocation location, SudokuValue value) const noexcept
 {
-  if(toPlaceOn.at(XYToSudokuPos(size, location)).first 
-  || toPlaceOn.at(XYToSudokuPos(size, location)).second.has_value()
-  || !value.has_value() 
-  || !XYToSquareIndex(size, SectionSize(), location).has_value()) {
+  if(toPlaceOn.at(XYToSudokuPos(size, location)).first) {
     return false;
   }
   
-  auto temp{ GetValues() };
+  if(!value.has_value() 
+  || !XYToSquareIndex(size, SectionSize(), location).has_value()) {
+    return false;
+  }
 
   // Allow placement on all empty tiles
   return true;
@@ -166,3 +162,13 @@ void Sudoku::Start()
   pSudokuSolver->PrepareSudoku(GetValues());
 }
 
+void Sudoku::Stop()
+{
+  // lock all values
+  std::for_each(values.begin(), values.end(), [](LockableValue& lv){lv.first = true;});
+}
+
+ bool Sudoku::IsSolved() const noexcept
+ {
+  return IsSolved(values);
+ }
