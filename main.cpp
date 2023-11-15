@@ -1,4 +1,5 @@
 
+#include "common/include/public/logger.h"
 #include "events/include/public/eventQueue.h"
 #include "events/include/public/events.h"
 #include "events/include/public/listener.h"
@@ -52,8 +53,19 @@ int main(int argc, char *argv[]) {
 
   Listener test{};
   test.Listen(&eventQueue, EVENT_ID::SUDOKU_PLACE);
-  Sudoku sudoku(size);
-  sudoku.GenerateSudoku();
+  
+  //Sudoku sudoku(size, {4,{},{},{},{},{},8,{},5,{},3,{},{},{},{},{},{},{},{},{},{},7,{},{},{},{},{},{},2,{},{},{},{},{},6,{},{},{},{},{},8,{},4,{},{},{},{},{},{},1,{},{},{},{},{},{},{},6,{},3,{},7,{},5,{},{},2,{},{},{},{},{},1,{},4,{},{},{},{},{},{}});
+  
+  Sudoku sudoku{size, {3, 0, 6, 5, 0, 8, 4, 0, 0,
+  5, 2, 0, 0, 0, 0, 0, 0, 0,
+  0, 8, 7, 0, 0, 0, 0, 3, 1,
+  0, 0, 3, 0, 1, 0, 0, 8, 0,
+  9, 0, 0, 8, 6, 3, 0, 0, 5,
+  0, 5, 0, 0, 9, 0, 6, 0, 0,
+  1, 3, 0, 0, 0, 0, 2, 5, 0,
+  0, 0, 0, 0, 0, 0, 0, 7, 4,
+  0, 0, 5, 2, 0, 6, 3, 0, 0}};
+  //sudoku.GenerateSudoku();
 
   SudokuMovement positioner{static_cast<unsigned int>(sudoku.SectionSize())};
 
@@ -64,6 +76,15 @@ int main(int argc, char *argv[]) {
 
   input.Init();
   input.StartInputHandler();
+
+
+  if(sudoku.IsSolvable()) {
+    Log::Debug("can be solved");
+    //sudoku.Solve();
+  } else {
+    Log::Debug("can NOT be solved");
+  }
+ShelldokuPrinter::PrintSudoku(sudoku.getValues(), size);
 
   while (IS_RUNNING) {
     // Handle the input events, waits for events to continue

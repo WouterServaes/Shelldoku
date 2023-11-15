@@ -2,12 +2,14 @@
 #include "common/include/public/logger.h"
 #include "include/public/shelldokuPrinter.h"
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <iterator>
 #include <memory>
 #include <random>
 #include <math.h>
 #include <string>
+#include <thread>
 #include <vector>
 //https://norvig.com/sudoku.html
 
@@ -31,10 +33,20 @@
 // sudoku value idx:  A1  A2  A3  A4  A5  A6  A7  A8  A9    B1  B2  B3  B4  B5  B6  B7  B8  B9    C1  C2  C3  C4  C5  C6  C7  C8  C9    D1  D2  D3  D4  D5  D6  D7  D8  D9    E1  E2  E3  E4  E5  E6  E7  E8  E9...
 // container idx:     0   1   2   3   4   5   6   7   8   | 9   10  11  12  13  14  15  16  17  | 18  19  20  21  22  23  24  25  26  | 27  28  29  30  31  32  33  34  35  | 36  37  38  39  40  41  42  43  44...
 // XY:                00  10  20  30  40  50  60  70  80    01  11  21  31  41  51  61  71  81    02  12  22  32  42  52  62  72  82    03  13  23  33  43  53  63  73  83    04  14  24  34  44  54  64  74  84...
-// => XY to container:
 
 
 Sudoku::Sudoku(std::size_t _size) : size(_size) { values.reserve(size * size); }
+
+Sudoku::Sudoku(std::size_t _size, std::vector<SudokuValue> _values)
+: size(_size)
+{
+  for(auto v:_values) {
+    if(v.value() == 0) {
+      v.reset();
+    }
+    values.emplace_back(LockableValue{v.has_value(), v});
+  }
+}
 
 Sudoku::~Sudoku() {}
 
@@ -51,96 +63,108 @@ void Sudoku::GenerateSudoku() {
     // std::shuffle(values.begin() + (idx * size),
     //              (values.begin() + (idx * size) + size), g);
   }
-
-  const auto p {GetPeers(17)};
-  // for(int idx{}; idx < values.size(); idx++) {
-  //   const auto p{GetPeers(idx)};
-
-    if(p.has_value()) {
-      std::string str;
-      for(int i{};i<p->size();i++){
-        str += std::to_string(p.value()[i]) + " ";
-      }
-      Log::Debug((std::to_string(17) + ": " + str).c_str());
-    }
-  // }
 }
 
 const std::vector<Sudoku::SudokuValue> Sudoku::getValues() const 
 {
-      std::vector<SudokuValue> c;
-      c.resize(values.size());
-      auto cIt{c.begin()};
-      auto vIt{values.begin()};
-      for(;cIt != c.end() && vIt != values.end();cIt++, vIt++) {
-        *cIt = vIt->second;
-      }
-      return c;
+  std::vector<SudokuValue> c;
+  c.resize(values.size());
+  auto cIt{c.begin()};
+  auto vIt{values.begin()};
+  for(;cIt != c.end() && vIt != values.end();cIt++, vIt++) {
+    *cIt = vIt->second;
+  }
+  return c;
 }
 
 bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) {
-  // Only place it if the value is not locked
-  if(!values.at(InputToSudokuPos(location)).first) {
-    values.at(InputToSudokuPos(location)).second = value;
+  if(PlaceValue(values, location, value)) {
     Log::Debug(std::to_string(InputToSudokuPos(location)).c_str());
     return true;
   }
   return false;
 }
 
-void Sudoku::SolveSudoku()
-{
-   
+bool Sudoku::PlaceValue(std::vector<LockableValue>& toPlaceOn, ValueLocation location, SudokuValue value) const {
+  // Only place it if the value is not locked and if it can be placed
+  if(!toPlaceOn.at(InputToSudokuPos(location)).first
+  && !toPlaceOn.at(InputToSudokuPos(location)).second.has_value()
+  && CanPlaceValue(toPlaceOn, location, value)
+  ) {
+    toPlaceOn.at(InputToSudokuPos(location)).second = value;
+    return true;
+  }
+
+  return false;
 }
 
-const std::optional<std::vector<std::size_t>> Sudoku::GetPeers(const std::size_t idx) const noexcept
+bool Sudoku::SolveSudoku(std::vector<LockableValue>& toSolve)
 {
-  if(idx < 0 || idx >= values.size()) {
-    return {};
+  // check if it is already solved
+  if(IsSolved(toSolve)) {
+    return true;
+  }
+
+  for(std::size_t idx{}; idx < size * size; idx++) {
+    if(!toSolve[idx].first 
+    && !toSolve[idx].second.has_value()) {
+      // go through each possible number
+      for(int newValue{1}; newValue <= size; newValue++) {
+        // try to place the number on the position, check if it is safe
+        if(PlaceValue(toSolve, SudokuPosToInput(idx), newValue)) {
+          // Check if it can be solved with this number
+          if(SolveSudoku(toSolve)) {
+            // it is solved
+            return true;
+          } 
+          // can't be solved with this number, clear the optional number
+          toSolve[idx].second.reset();
+        }
+      }
+    }
+  }
+  // Went through all values, no solution
+  return false;
+}
+
+bool Sudoku::IsSolvable() noexcept
+{
+  auto temp = values;
+  return SolveSudoku(temp);
+}
+
+void Sudoku::GatherPeers(const std::vector<LockableValue>& toGatherFrom, const std::size_t idx, std::vector<SudokuValue>& foundPeers) const noexcept
+{
+  foundPeers.clear();
+
+  if(idx < 0 || idx >= toGatherFrom.size()) {
+    return;
   }
   
   const auto xy{SudokuPosToInput(idx)};
   const auto directPeers{GetDirectPeers(idx)};
 
-  if(!directPeers.has_value())
-    return {};
-
+  if(!directPeers.has_value()) {
+    return;
+  }
+    
   // for 9x9 sudoku: 8 horizontal, 8 vertical, 4 left in the square excluding the hor/vert
-  const std::size_t peersCount{((size - 1) * 2) + (size - 1 - 4)};
-  std::vector<std::size_t> horPeers{};
-  std::vector<std::size_t> vertPeers{};
+  //const std::size_t peersCount{((size - 1) * 2) + (size - 1 - 4)};
   
   for(int peerIdx{}; peerIdx < size; peerIdx++) {
+    // column
     auto p{InputToSudokuPos({peerIdx, xy.second})};
     if(p != idx)
-     horPeers.push_back(p);
-
+     foundPeers.emplace_back(toGatherFrom[p].second);
+    // row
     p = InputToSudokuPos({xy.first, peerIdx}) ;
     if(p != idx)
-      vertPeers.push_back(p);
+      foundPeers.emplace_back(toGatherFrom[p].second);
   }
 
-  std::vector<std::size_t> r{};
-  // insert all found values in return vector
-  r.insert(r.end(), horPeers.begin(), horPeers.end());
-  r.insert(r.end(), vertPeers.begin(), vertPeers.end());
-
-  // Inserting the optional vector does not work for some reason?
-  //r.insert(r.end(), directPeers.value().begin(), directPeers.value().begin());
-  
   for(auto dp: directPeers.value()) {
-    r.push_back(dp);
+    foundPeers.emplace_back(toGatherFrom[dp].second);
   }
-
-  //remove duplicates
-  std::sort(r.begin(), r.end());
-  r.erase( std::unique( r.begin(), r.end() ), r.end());
-
-  if(r.size() != peersCount) {
-    Log::Debug(("Peers size not expected: " + std::to_string(r.size())).c_str());
-  }
-
-  return r;
 }
 
 const std::optional<std::vector<std::size_t>> Sudoku::GetDirectPeers(const std::size_t idx) const noexcept
@@ -183,8 +207,6 @@ const std::optional<std::vector<std::size_t>> Sudoku::GetDirectPeers(const std::
   }
   
   return r;
-    
-  
 }
 
 const std::optional<std::size_t> Sudoku::GetSquareIndex(const std::size_t idx) const noexcept
@@ -216,3 +238,30 @@ const std::optional<std::size_t> Sudoku::GetIndexOfSquare(const std::size_t squa
   return {(squareIdx * size) - (((squareIdx % SectionSize()) * 2) * SectionSize())};
 }
 
+bool Sudoku::CanPlaceValue(const std::vector<LockableValue>& toPlaceOn, ValueLocation location, SudokuValue value) const noexcept
+{
+  if(!toPlaceOn.at(InputToSudokuPos(location)).first 
+  && !toPlaceOn.at(InputToSudokuPos(location)).second.has_value()) {
+    return false;
+  }
+
+  std::vector<SudokuValue> peers{};
+  GatherPeers(toPlaceOn, InputToSudokuPos(location), peers);
+  if(peers.empty()) {
+    return false;
+  }
+  
+  return std::find(peers.begin(), peers.end(), value) == peers.end();
+}
+
+bool Sudoku::IsSolved(const std::vector<LockableValue>& toCheck) const noexcept
+{
+  return std::find_if(toCheck.begin(), toCheck.end(), [](LockableValue lv) { return !lv.second.has_value();}) == toCheck.end();
+}
+
+void Sudoku::Solve()
+{
+  Log::Debug("trying to solve...");
+  SolveSudoku(values);
+  Log::Debug("solved");
+}
