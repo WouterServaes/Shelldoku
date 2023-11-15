@@ -140,7 +140,8 @@ bool Sudoku::CanPlaceValue(const std::vector<LockableValue>& toPlaceOn, ValueLoc
   
   auto temp{ GetValues() };
 
-  return pSudokuSolver->CanBePlaced(temp, location, value);
+  // Allow placement on all empty tiles
+  return true;
 }
 
 bool Sudoku::IsSolved(const std::vector<LockableValue>& toCheck) const noexcept
