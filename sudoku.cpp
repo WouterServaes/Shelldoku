@@ -34,6 +34,8 @@
 // sudoku value idx:  A1  A2  A3  A4  A5  A6  A7  A8  A9    B1  B2  B3  B4  B5  B6  B7  B8  B9    C1  C2  C3  C4  C5  C6  C7  C8  C9    D1  D2  D3  D4  D5  D6  D7  D8  D9    E1  E2  E3  E4  E5  E6  E7  E8  E9...
 // container idx:     0   1   2   3   4   5   6   7   8   | 9   10  11  12  13  14  15  16  17  | 18  19  20  21  22  23  24  25  26  | 27  28  29  30  31  32  33  34  35  | 36  37  38  39  40  41  42  43  44...
 // XY:                00  10  20  30  40  50  60  70  80    01  11  21  31  41  51  61  71  81    02  12  22  32  42  52  62  72  82    03  13  23  33  43  53  63  73  83    04  14  24  34  44  54  64  74  84...
+// Stored in Row-major order
+// Where X defines the columns index, and Y defines the row index. array[width * row + col] = value; 
 
 Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver) 
 : size(_size), pSudokuSolver(std::move(_pSudokuSolver))
@@ -48,6 +50,24 @@ Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver, 
     }
     values.emplace_back(LockableValue{v.has_value(), v});
   }
+
+  // for(unsigned int r{}; r < size; r++) {
+  //   for(unsigned int c{}; c < size; c++) {
+  //     const auto value = values.at(XYToSudokuPos(size, {c,r}));
+  //     const auto v = (value.second? value.second.value() : 0);
+  //     Log::Debug((
+  //       "r" + std::to_string(r) 
+  //     + " c" + std::to_string(c)
+  //     + " idx" + std::to_string(XYToSudokuPos(size, {c,r})) 
+  //     + " xy" + std::to_string(SudokuPosToXY(size, XYToSudokuPos(size, {c,r})).first) 
+  //     + "," + std::to_string(SudokuPosToXY(size, XYToSudokuPos(size, {c,r})).second) 
+  //     + " sqrIdx" + std::to_string(SudokuPosSquareIndex(size, SectionSize(), XYToSudokuPos(size, {c,r})).value())
+  //     + " sqrIdx" + std::to_string(XYToSquareIndex(size, SectionSize(), {c,r}).value())
+  //     + " sqrP " + std::to_string(GetIndexOfSquare(size, SectionSize(), XYToSquareIndex(size, SectionSize(), {c,r}).value()).value())
+      
+  //     + ": "+std::to_string(v)).c_str());
+  //   }
+  // }
 }
 
 Sudoku::~Sudoku() {}
@@ -88,13 +108,15 @@ void Sudoku::SetValues(const std::vector<SudokuValue> _values)
   }
 }
 
-bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) {
-    // Only place it if the value is not locked and if it can be placed
-  if(!values.at(InputToSudokuPos(size, location)).first
-  || !values.at(InputToSudokuPos(size, location)).second.has_value()
+bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) 
+{
+  Log::Debug(std::string(std::string("l:") + std::to_string(location.first) + ","+std::to_string(location.second) + " or " + std::to_string(XYToSudokuPos(size, location))));
+  // Only place it if the value is not locked and if it can be placed
+  if(!values.at(XYToSudokuPos(size, location)).first
+  || !values.at(XYToSudokuPos(size, location)).second.has_value()
   || CanPlaceValue(values, location, value)
   ) {
-    values.at(InputToSudokuPos(size, location)).second = value;
+    values.at(XYToSudokuPos(size, location)).second = value;
     return true;
   }
 
@@ -109,10 +131,10 @@ bool Sudoku::IsSolvable() noexcept
 
 bool Sudoku::CanPlaceValue(const std::vector<LockableValue>& toPlaceOn, ValueLocation location, SudokuValue value) const noexcept
 {
-  if(toPlaceOn.at(InputToSudokuPos(size, location)).first 
-  || toPlaceOn.at(InputToSudokuPos(size, location)).second.has_value()
+  if(toPlaceOn.at(XYToSudokuPos(size, location)).first 
+  || toPlaceOn.at(XYToSudokuPos(size, location)).second.has_value()
   || !value.has_value() 
-  || !InputToSquareIndex(size, SectionSize(), location).has_value()) {
+  || !XYToSquareIndex(size, SectionSize(), location).has_value()) {
     return false;
   }
   

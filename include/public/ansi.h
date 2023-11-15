@@ -66,7 +66,6 @@ static void GetCursorPosition(int &x, int &y) {
 static void SaveCursorPos() noexcept {
   std::cout << ANSI_ESCAPE << "[s";
   // save the cursor position into the variable
-  // GetCursorPosition(&CursorPosition[0], &CursorPosition[1]);
 }
 // Moves the cursor back to saved position
 static void BackToSaved() noexcept { std::cout << ANSI_ESCAPE << "[u"; }
