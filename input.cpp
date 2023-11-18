@@ -1,7 +1,7 @@
 #include "include/private/input.h"
 #include "events/include/private/dispatcher.h"
 #include "events/include/private/events.h"
-#include "include/private/ansi.h"
+#include "common/include/public/ansi.h"
 
 #include <algorithm>
 #include <cctype>

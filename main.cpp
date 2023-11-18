@@ -4,7 +4,7 @@
 #include "events/include/private/eventQueue.h"
 #include "events/include/private/events.h"
 #include "events/include/private/listener.h"
-#include "include/private/ansi.h"
+#include "common/include/public/ansi.h"
 #include "include/private/input.h"
 #include "include/private/shelldokuPrinter.h"
 #include "include/private/sudoku.h"

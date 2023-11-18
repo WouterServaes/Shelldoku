@@ -1,7 +1,6 @@
 // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 #pragma once
 
-#include "input.h"
 #include <cstdint>
 #include <functional>
 #include <iostream>
@@ -12,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <string_view>
 
 namespace Ansi {
 
