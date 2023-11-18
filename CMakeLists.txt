@@ -30,7 +30,8 @@ mark_as_advanced(SYSTEMD_INCLUDE_DIRS SYSTEMD_LIBRARIES)
 
 set(DCMAKE_EXPORT_COMPILE_COMMANDS=1)
 
-set(SOURCE main.cpp shelldokuPrinter.cpp sudoku.cpp input.cpp sudokuMovement.cpp sudokuSolver.cpp events/events.cpp events/dispatcher.cpp events/eventQueue.cpp events/listener.cpp) 
+
+set(SOURCE main.cpp shelldokuPrinter.cpp sudoku.cpp sudokuMovement.cpp sudokuSolver.cpp common/input.cpp common/events/events.cpp common/events/dispatcher.cpp common/events/eventQueue.cpp common/events/listener.cpp) 
 
 add_executable(${PROJECT_NAME} ${SOURCE})
 target_link_libraries(${PROJECT_NAME} ${SYSTEMD_LIBRARIES})
