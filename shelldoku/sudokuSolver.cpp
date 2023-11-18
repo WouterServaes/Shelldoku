@@ -1,6 +1,8 @@
 #include "include/private/sudokuSolver.h"
 #include "include/private/sudokuHelpers.h"
-#include "common/include/public/logger.h"
+
+#include "logger.h"
+
 #include <string>
 
 SudokuSolver::SudokuSolver(const std::size_t size, const std::size_t sectionSize)

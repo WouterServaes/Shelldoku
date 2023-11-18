@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../../common/include/public/ansi.h"
+#include "ansi.h"
+#include "logger.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -8,7 +10,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include "../../common/include/public/logger.h"
+
 namespace ShelldokuPrinter {
 
 // Fills the terminal with a placeholder sudoku board

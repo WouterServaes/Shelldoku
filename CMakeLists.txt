@@ -31,7 +31,16 @@ mark_as_advanced(SYSTEMD_INCLUDE_DIRS SYSTEMD_LIBRARIES)
 set(DCMAKE_EXPORT_COMPILE_COMMANDS=1)
 
 
-set(SOURCE main.cpp shelldokuPrinter.cpp sudoku.cpp sudokuMovement.cpp sudokuSolver.cpp common/input.cpp common/events/events.cpp common/events/dispatcher.cpp common/events/eventQueue.cpp common/events/listener.cpp) 
+add_library(SUDOKU_GENERATOR SHARED lib/sudokuGenerator.cpp)
+
+set(COMMON common/input.cpp common/events/events.cpp common/events/dispatcher.cpp common/events/eventQueue.cpp common/events/listener.cpp)
+set(SHELLDOKU shelldoku/shelldokuPrinter.cpp shelldoku/sudoku.cpp shelldoku/sudokuMovement.cpp shelldoku/sudokuSolver.cpp)
+
+set(SOURCE main.cpp ${COMMON} ${SHELLDOKU}) 
 
 add_executable(${PROJECT_NAME} ${SOURCE})
 target_link_libraries(${PROJECT_NAME} ${SYSTEMD_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${SUDOKU_GENERATOR})
+
+target_include_directories(${PROJECT_NAME} PUBLIC lib/include/public/)
+target_include_directories(${PROJECT_NAME} PUBLIC common/include/public)
