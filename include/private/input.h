@@ -1,7 +1,7 @@
 // https://github.com/mouuff/simple-getch/tree/master
 #pragma once
 
-#include "../../events/include/public/dispatcher.h"
+#include "../../events/include/private/dispatcher.h"
 #include <any>
 #include <atomic>
 #include <cstdint>

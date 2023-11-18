@@ -1,6 +1,6 @@
-#include "include/public/eventQueue.h"
-#include "include/public/events.h"
-#include "include/public/listener.h"
+#include "include/private/eventQueue.h"
+#include "include/private/events.h"
+#include "include/private/listener.h"
 #include <algorithm>
 #include <memory>
 #include <mutex>

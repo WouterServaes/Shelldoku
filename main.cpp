@@ -1,15 +1,15 @@
 
 #include "common/include/public/logger.h"
-#include "events/include/public/eventID.h"
-#include "events/include/public/eventQueue.h"
-#include "events/include/public/events.h"
-#include "events/include/public/listener.h"
-#include "include/public/ansi.h"
-#include "include/public/input.h"
-#include "include/public/shelldokuPrinter.h"
-#include "include/public/sudoku.h"
-#include "include/public/sudokuMovement.h"
-#include "include/public/sudokuSolver.h"
+#include "events/include/private/eventID.h"
+#include "events/include/private/eventQueue.h"
+#include "events/include/private/events.h"
+#include "events/include/private/listener.h"
+#include "include/private/ansi.h"
+#include "include/private/input.h"
+#include "include/private/shelldokuPrinter.h"
+#include "include/private/sudoku.h"
+#include "include/private/sudokuMovement.h"
+#include "include/private/sudokuSolver.h"
 #include <algorithm>
 #include <array>
 #include <chrono>

@@ -1,5 +1,5 @@
-#include "include/public/sudokuSolver.h"
-#include "include/public/sudokuHelpers.h"
+#include "include/private/sudokuSolver.h"
+#include "include/private/sudokuHelpers.h"
 #include "common/include/public/logger.h"
 #include <string>
 

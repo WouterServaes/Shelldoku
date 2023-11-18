@@ -1,7 +1,7 @@
-#include "include/public/sudoku.h"
+#include "include/private/sudoku.h"
 #include "common/include/public/logger.h"
-#include "include/public/shelldokuPrinter.h"
-#include "include/public/sudokuHelpers.h"
+#include "include/private/shelldokuPrinter.h"
+#include "include/private/sudokuHelpers.h"
 #include <algorithm>
 #include <chrono>
 #include <cstddef>

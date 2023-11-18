@@ -1,4 +1,4 @@
-#include "include/public/shelldokuPrinter.h"
+#include "include/private/shelldokuPrinter.h"
 
 // using namespace ShelldokuPrinter;
 

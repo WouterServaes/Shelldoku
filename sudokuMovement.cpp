@@ -1,5 +1,5 @@
-#include "include/public/sudokuMovement.h"
-#include "include/public/ansi.h"
+#include "include/private/sudokuMovement.h"
+#include "include/private/ansi.h"
 #include "common/include/public/logger.h"
 
 #include <math.h>
