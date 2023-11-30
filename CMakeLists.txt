@@ -31,16 +31,24 @@ mark_as_advanced(SYSTEMD_INCLUDE_DIRS SYSTEMD_LIBRARIES)
 set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
+add_library(SUDOKU_SOLVER SHARED lib/sudokuSolver.cpp)
 add_library(SUDOKU_GENERATOR SHARED lib/sudokuGenerator.cpp)
+# link solver to generator, generator needs to solve
+target_link_libraries(SUDOKU_GENERATOR ${SUDOKU_SOLVER})
 
 set(COMMON common/input.cpp common/events/events.cpp common/events/dispatcher.cpp common/events/eventQueue.cpp common/events/listener.cpp)
-set(SHELLDOKU shelldoku/shelldokuPrinter.cpp shelldoku/sudoku.cpp shelldoku/sudokuMovement.cpp shelldoku/sudokuSolver.cpp)
+set(SHELLDOKU shelldoku/sudoku.cpp shelldoku/shelldokuPrinter.cpp shelldoku/sudokuMovement.cpp)
 
-set(SOURCE main.cpp ${COMMON} ${SHELLDOKU}) 
+# Is this not done by linking the library? 
+set(LIBRARY_CPP lib/sudokuSolver.cpp lib/sudokuGenerator.cpp)
+
+set(SOURCE main.cpp ${COMMON} ${SHELLDOKU} ${LIBRARY_CPP}) 
 
 add_executable(${PROJECT_NAME} ${SOURCE})
+
 target_link_libraries(${PROJECT_NAME} ${SYSTEMD_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${SUDOKU_GENERATOR})
+target_link_libraries(${PROJECT_NAME} ${SUDOKU_SOLVER})
 
 target_include_directories(${PROJECT_NAME} PUBLIC lib/include/public/)
-target_include_directories(${PROJECT_NAME} PUBLIC common/include/public)
+target_include_directories(${PROJECT_NAME} PUBLIC common/include/public/)

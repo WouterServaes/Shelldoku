@@ -1,19 +1,17 @@
 #include "include/private/sudoku.h"
 #include "include/private/shelldokuPrinter.h"
-#include "include/private/sudokuHelpers.h"
 
-#include "../common/include/public/logger.h"
+#include "logger.h"
 
-#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <iterator>
 #include <memory>
-#include <random>
 #include <math.h>
 #include <string>
 #include <thread>
 #include <vector>
+
 //https://norvig.com/sudoku.html
 
 // layout
@@ -39,8 +37,8 @@
 // Stored in Row-major order
 // Where X defines the columns index, and Y defines the row index. array[width * row + col] = value; 
 
-Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver) 
-: size(_size), pSudokuSolver(std::move(_pSudokuSolver))
+Sudoku::Sudoku(std::size_t _size) 
+: size(_size), pSudokuSolver(std::unique_ptr<SudokuSolver>(new SudokuSolver())), pSudokuGenerator(std::unique_ptr<SudokuGenerator>(new SudokuGenerator()))
 {
   values.resize(size * size);
   const auto sectionSize{SectionSize()};
@@ -77,8 +75,8 @@ Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver)
   // }
 }
 
-Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver, std::vector<SudokuValue> _values)
-: size(_size), pSudokuSolver(std::move(_pSudokuSolver))
+Sudoku::Sudoku(std::size_t _size, std::vector<SudokuValue> _values)
+: size(_size), pSudokuSolver(std::unique_ptr<SudokuSolver>(new SudokuSolver())), pSudokuGenerator(std::unique_ptr<SudokuGenerator>(new SudokuGenerator()))
 {
   for(auto v:_values) {
     if(v.value() == 0) {
@@ -90,28 +88,13 @@ Sudoku::Sudoku(std::size_t _size, std::unique_ptr<SudokuSolver> _pSudokuSolver, 
 
 Sudoku::~Sudoku() {}
 
-void Sudoku::GenerateSudoku() {
-  do {
-    Shuffle();
-  } while(!pSudokuSolver->ValidateSudoku(GetValues()));
-}
-
-void Sudoku::Shuffle()
-{
-  std::random_device rd;
-  std::mt19937_64 g(rd());
-
-  for(int squareIdx{}; squareIdx < size; squareIdx++) {
-    auto idxs{GetAllIndexesOfSquare(size, SectionSize(), squareIdx)};
-    const auto originalIdxs{idxs};
-    std::shuffle(idxs.begin(), idxs.end(), g);
-    for(int idx{}; idx < idxs.size(); idx++) {
-      auto v1{values[originalIdxs[idx]]};
-      auto v2{values[idxs[idx]]};
-      values[originalIdxs[idx]] = v2;
-      values[idxs[idx]] = v1;
-    }
-  }  
+void Sudoku::GenerateSudoku(Generator& generator) {
+  generator.values = GetValues();
+  if(!pSudokuGenerator->Generate(generator)) {
+    Log::Debug("Unable to generate");
+    return;
+  } 
+  SetValues(generator.values);
 }
 
 const std::vector<SudokuValue> Sudoku::GetValues() const 
@@ -147,8 +130,9 @@ bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value)
 
 bool Sudoku::IsSolvable() noexcept
 {
-  auto temp{ GetValues() };
-  return pSudokuSolver->ValidateSudoku(temp) && pSudokuSolver->CanBeSolved(temp);
+  Solver solver{size, SectionSize(), SolverTypes::Bitstring};
+  solver.values = GetValues();
+  return pSudokuSolver->ValidateSudoku(solver) && pSudokuSolver->CanBeSolved(solver);
 }
 
 bool Sudoku::CanPlaceValue(const std::vector<LockableValue>& toPlaceOn, ValueLocation location, SudokuValue value) const noexcept
@@ -168,15 +152,18 @@ bool Sudoku::CanPlaceValue(const std::vector<LockableValue>& toPlaceOn, ValueLoc
 
 bool Sudoku::IsSolved(const std::vector<LockableValue>& toCheck) const noexcept
 {
-  return std::find_if(toCheck.begin(), toCheck.end(), [](LockableValue lv) { return !lv.second.has_value();}) == toCheck.end() && pSudokuSolver->ValidateSudoku(GetValues());
+  Solver solver{size, SectionSize(), SolverTypes::Bitstring};
+  solver.values = GetValues();
+  return std::find_if(toCheck.begin(), toCheck.end(), [](LockableValue lv) { return !lv.second.has_value();}) == toCheck.end() && pSudokuSolver->ValidateSudoku(solver);
 }
 
 void Sudoku::Solve()
 {
+  Solver solver{size, SectionSize(), SolverTypes::Bitstring};
+  solver.values = GetValues();
   Log::Debug("trying to solve...");
-  auto temp{ GetValues() };
-  if(pSudokuSolver->Solve(temp)) {
-    SetValues(temp);
+  if(pSudokuSolver->Solve(solver)) {
+    SetValues(solver.values);
     Log::Debug("solved");
   } else {
     Log::Debug("can't be solved");
@@ -185,7 +172,6 @@ void Sudoku::Solve()
 
 void Sudoku::Start()
 {
-  pSudokuSolver->PrepareSudoku(GetValues());
 }
 
 void Sudoku::Stop()

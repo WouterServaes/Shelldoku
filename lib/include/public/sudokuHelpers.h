@@ -3,6 +3,11 @@
 #include <tuple>
 #include <vector>
 
+enum class SolverTypes {
+  None = 0,
+  Bitstring = 1
+};
+
 // X Y location
 using X = std::size_t;
 using Y = std::size_t;

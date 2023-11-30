@@ -1,5 +1,6 @@
 
 #pragma once
+#include "sudokuGenerator.h"
 #include "sudokuHelpers.h"
 #include "sudokuSolver.h"
 
@@ -19,11 +20,11 @@ static const unsigned int SUDOKU_FAIL = 7;
 class Sudoku final {
 public:
   Sudoku() = delete;
-  Sudoku(std::size_t size, std::unique_ptr<SudokuSolver> pSudokuSolver);
-  Sudoku(std::size_t size, std::unique_ptr<SudokuSolver> pSudokuSolver, std::vector<SudokuValue> values);
+  Sudoku(std::size_t size);
+  Sudoku(std::size_t size, std::vector<SudokuValue> values);
   ~Sudoku();
   // Generates sudoku
-  void GenerateSudoku();
+  void GenerateSudoku(Generator& generator);
 
   // Returns copy of values
   [[nodiscard]] const std::vector<SudokuValue> GetValues() const;
@@ -53,9 +54,9 @@ private:
   // Returns true if sudoku is solved
   [[nodiscard]] bool IsSolved(const std::vector<LockableValue>& toCheck) const noexcept;
 
-  void Shuffle();
-
   const std::size_t size;
   std::vector<LockableValue> values;
+
+  std::unique_ptr<SudokuGenerator> pSudokuGenerator;
   std::unique_ptr<SudokuSolver> pSudokuSolver;
 };

@@ -1,10 +1,16 @@
 #pragma once
+#include "../public/sudokuHelpers.h"
+#include "../public/sudokuSolver.h"
 
-struct Generator;
+#include <cstddef>
+#include <memory>
+#include <vector>
+
+class Generator;
 
 class SudokuGenerator_ {
   public:
-    SudokuGenerator_() = default;
+    SudokuGenerator_();
     ~SudokuGenerator_() = default;
     SudokuGenerator_(const SudokuGenerator_&) = delete;
     SudokuGenerator_(SudokuGenerator_&&) = delete;
@@ -13,4 +19,8 @@ class SudokuGenerator_ {
 
 
     [[nodiscard]] bool Generate(Generator& generator);
+
+  private:
+    void Shuffle(Generator& generator);
+    std::unique_ptr<SudokuSolver> pSudokuSolver;
 };

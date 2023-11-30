@@ -1,17 +1,17 @@
-
+#include "ansi.h"
 #include "logger.h"
+
 #include "common/events/include/private/eventID.h"
 #include "common/events/include/private/eventQueue.h"
 #include "common/events/include/private/events.h"
 #include "common/events/include/private/listener.h"
-#include "ansi.h"
 #include "common/include/private/input.h"
 
 #include "shelldoku/include/private/shelldokuPrinter.h"
 #include "shelldoku/include/private/sudoku.h"
 #include "shelldoku/include/private/sudokuMovement.h"
-#include "shelldoku/include/private/sudokuSolver.h"
 
+#include "sudokuSolver.h"
 #include "sudokuGenerator.h"
 
 #include <algorithm>
@@ -34,6 +34,7 @@
 #include <string_view>
 #include <thread>
 #include <vector>
+#include <chrono>
 
 struct ArgOptions{
   unsigned int size{9};
@@ -76,9 +77,11 @@ int main(int argc, char *argv[]) {
   // 1, 3, 0, 0, 0, 0, 2, 5, 0,
   // 0, 0, 0, 0, 0, 0, 0, 7, 4,
   // 0, 0, 5, 2, 0, 6, 3, 0, 0}};
-  Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new SudokuSolver_bitmasks(size, size / 3))};
+  Sudoku sudoku{Sudoku(size)};
+  Solver solver{size, size / 3, SolverTypes::Bitstring};
   if(options.generate) {
-    sudoku.GenerateSudoku();
+    Generator settings{size, sudoku.SectionSize(), std::chrono::seconds(60)};
+    sudoku.GenerateSudoku(settings);
   }
 
   SudokuMovement positioner{static_cast<unsigned int>(sudoku.SectionSize())};

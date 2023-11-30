@@ -1,18 +1,27 @@
-#include <vector>
+#pragma once
+#include "sudokuHelpers.h"
+#include <chrono>
 #include <memory>
-
-struct Generator {
-  std::vector<unsigned int> values{};
-  const std::size_t size;
-  const std::size_t sectionSize;
-};
+#include <vector>
 
 class SudokuGenerator_;
+
+struct Generator {
+  Generator() = delete;
+  Generator(const std::size_t size_, const std::size_t sectionSize_, std::chrono::seconds maxGenerationTime_)
+    :size(size_), sectionSize(sectionSize_), maxGenerationTime(maxGenerationTime_){}
+
+  std::vector<SudokuValue> values{};
+  const std::size_t size;
+  const std::size_t sectionSize;
+
+  std::chrono::seconds maxGenerationTime;
+};
 
 class SudokuGenerator {
   public:
     SudokuGenerator();
-    ~SudokuGenerator() = default;
+    ~SudokuGenerator();
     SudokuGenerator(const SudokuGenerator&) = delete;
     SudokuGenerator(SudokuGenerator&&) = delete;
     SudokuGenerator& operator=(const SudokuGenerator&) = delete;
@@ -22,5 +31,5 @@ class SudokuGenerator {
     [[nodiscard]] bool Generate(Generator& generator);
 
   private:
-    std::unique_ptr<SudokuGenerator_> pSudokuGenerator; 
+    SudokuGenerator_* pSudokuGenerator; 
 };
