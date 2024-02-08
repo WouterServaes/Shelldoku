@@ -1,4 +1,4 @@
-#include "include/private/events.h"
+#include "events.h"
 #include <string_view>
 
 Event::Event(const EventID id) : id(id) {}

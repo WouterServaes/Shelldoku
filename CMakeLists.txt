@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-
-project(Shelldoku
-LANGUAGES CXX
-
-)
-
+project(global)
 
 # find the systemd files, code from https://fossies.org/linux/apt/CMake/FindSystemd.cmake
 find_package(PkgConfig)
@@ -36,25 +31,16 @@ add_library(SUDOKU_GENERATOR SHARED lib/sudokuGenerator.cpp)
 # link solver to generator, generator needs to solve
 target_link_libraries(SUDOKU_GENERATOR ${SUDOKU_SOLVER})
 
-set(COMMON common/input.cpp common/events/events.cpp common/events/dispatcher.cpp common/events/eventQueue.cpp common/events/listener.cpp)
-set(SHELLDOKU shelldoku/sudoku.cpp shelldoku/shelldokuPrinter.cpp shelldoku/sudokuMovement.cpp)
+file(GLOB COMMON common/*.cpp common/events/*.cpp)
 
 # Is this not done by linking the library? 
-set(LIBRARY_CPP lib/sudokuSolver.cpp lib/sudokuGenerator.cpp)
+file(GLOB LIBRARY_CPP lib/*.cpp)
 
-set(SOURCE main.cpp ${COMMON} ${SHELLDOKU} ${LIBRARY_CPP}) 
+set(PUBLIC_INCLUDE_DIRS lib/include/public/ common/include/public/ common/events/include/public/)
+set(PRIVATE_INCLUDE_DIRS lib/include/private)
+target_include_directories(SUDOKU_SOLVER PUBLIC ${PUBLIC_INCLUDE_DIRS})
+target_include_directories(SUDOKU_SOLVER PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
+target_include_directories(SUDOKU_GENERATOR PUBLIC ${PUBLIC_INCLUDE_DIRS}) 
+target_include_directories(SUDOKU_GENERATOR PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
 
-add_executable(${PROJECT_NAME} ${SOURCE})
-
-target_link_libraries(${PROJECT_NAME} ${SYSTEMD_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${SUDOKU_GENERATOR})
-target_link_libraries(${PROJECT_NAME} ${SUDOKU_SOLVER})
-
-target_include_directories(${PROJECT_NAME} PUBLIC lib/include/public/)
-target_include_directories(${PROJECT_NAME} PUBLIC common/include/public/)
-
-target_include_directories(SUDOKU_SOLVER PUBLIC lib/include/public/)
-target_include_directories(SUDOKU_SOLVER PUBLIC common/include/public/)
-
-target_include_directories(SUDOKU_GENERATOR PUBLIC lib/include/public/)
-target_include_directories(SUDOKU_GENERATOR PUBLIC common/include/public/)
+add_subdirectory(shelldoku)

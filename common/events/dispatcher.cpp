@@ -1,5 +1,5 @@
-#include "include/private/dispatcher.h"
-#include "include/private/eventQueue.h"
+#include "dispatcher.h"
+#include "eventQueue.h"
 
 Dispatcher::Dispatcher(EventQueue *pEventQueue) : pEventQueue(pEventQueue) {}
 

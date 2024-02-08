@@ -1,7 +1,7 @@
-#include "include/private/listener.h"
-#include "../include/public/logger.h"
-#include "include/private/eventQueue.h"
-#include "include/private/events.h"
+#include "listener.h"
+#include "eventQueue.h"
+#include "events.h"
+#include "logger.h"
 #include <algorithm>
 #include <iostream>
 #include <memory>

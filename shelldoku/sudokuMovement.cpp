@@ -1,4 +1,4 @@
-#include "include/private/sudokuMovement.h"
+#include "sudokuMovement.h"
 
 #include "ansi.h"
 #include "logger.h"

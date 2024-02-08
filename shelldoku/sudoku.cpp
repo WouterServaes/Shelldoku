@@ -1,5 +1,5 @@
-#include "include/private/sudoku.h"
-#include "include/private/shelldokuPrinter.h"
+#include "sudoku.h"
+#include "shelldokuPrinter.h"
 
 #include "logger.h"
 

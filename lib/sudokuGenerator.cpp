@@ -40,6 +40,7 @@ bool SudokuGenerator_::Generate(Generator &generator) {
   auto startT{std::chrono::steady_clock::now()};
 
   auto timeleft{std::chrono::steady_clock::now() - startT};
+  Log::Debug("Starting sudoku generation...");
   do {
     timeleft = std::chrono::steady_clock::now() - startT;
     Shuffle(generator);
