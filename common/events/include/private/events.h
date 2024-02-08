@@ -1,5 +1,6 @@
 #pragma once
 
+#include "eventID.h"
 #include <bits/utility.h>
 #include <cstdint>
 #include <functional>
@@ -8,7 +9,6 @@
 #include <string_view>
 #include <tuple>
 #include <utility>
-#include "eventID.h"
 
 // Simple event with an ID, listeners implement the functionality
 class Event {

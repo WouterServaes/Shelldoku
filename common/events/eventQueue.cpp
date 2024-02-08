@@ -22,7 +22,7 @@ void EventQueue::PushEvent(EventID id) {
 }
 
 void EventQueue::HandleQueue(bool stallThread) {
-  if(stallThread) {
+  if (stallThread) {
     std::unique_lock<std::mutex> lock{waitForEventsMutex};
     queueWaitCond.wait(lock);
   }

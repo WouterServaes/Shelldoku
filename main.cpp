@@ -11,8 +11,8 @@
 #include "shelldoku/include/private/sudoku.h"
 #include "shelldoku/include/private/sudokuMovement.h"
 
-#include "sudokuSolver.h"
 #include "sudokuGenerator.h"
+#include "sudokuSolver.h"
 
 #include <algorithm>
 #include <array>
@@ -34,17 +34,15 @@
 #include <string_view>
 #include <thread>
 #include <vector>
-#include <chrono>
 
-struct ArgOptions{
+struct ArgOptions {
   unsigned int size{9};
   bool generate{false};
 };
 
 [[nodiscard]] ArgOptions ParseArgs(int argc, char *argv[]);
-void CreateInputMap(InputHandling::Input *pInput,
-                    Sudoku* pSudoku,
-                    SudokuMovement* pPositioner, EventQueue* pEventQueue);
+void CreateInputMap(InputHandling::Input *pInput, Sudoku *pSudoku,
+                    SudokuMovement *pPositioner, EventQueue *pEventQueue);
 
 bool IS_RUNNING{true};
 void SetIsRunning(bool *pIsRunning, bool running) { *pIsRunning = running; }
@@ -55,31 +53,26 @@ int main(int argc, char *argv[]) {
   const unsigned int size{options.size};
 
   ShelldokuPrinter::PrepareSudokuField(size);
-  
+
   // create queue object
   EventQueue eventQueue{};
 
   // input is a dispacher object
   InputHandling::Input input{&eventQueue};
+  // Listener test{};
+  // test.Listen(&eventQueue, EVENT_ID::SUDOKU_PLACE);
 
-  //Listener test{};
-  //test.Listen(&eventQueue, EVENT_ID::SUDOKU_PLACE);
-  
-  //Sudoku sudoku(size, {4,{},{},{},{},{},8,{},5,{},3,{},{},{},{},{},{},{},{},{},{},7,{},{},{},{},{},{},2,{},{},{},{},{},6,{},{},{},{},{},8,{},4,{},{},{},{},{},{},1,{},{},{},{},{},{},{},6,{},3,{},7,{},5,{},{},2,{},{},{},{},{},1,{},4,{},{},{},{},{},{}});
-  
-  // Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new SudokuSolver_bitmasks(size, size/3)),{
-  // 3, 0, 6, 5, 0, 8, 4, 0, 0,
-  // 5, 2, 0, 0, 0, 0, 0, 0, 0,
-  // 0, 8, 7, 0, 0, 0, 0, 3, 1,
-  // 0, 0, 3, 0, 1, 0, 0, 8, 0,
-  // 9, 0, 0, 8, 6, 3, 0, 0, 5,
-  // 0, 5, 0, 0, 9, 0, 6, 0, 0,
-  // 1, 3, 0, 0, 0, 0, 2, 5, 0,
-  // 0, 0, 0, 0, 0, 0, 0, 7, 4,
-  // 0, 0, 5, 2, 0, 6, 3, 0, 0}};
+  // Sudoku sudoku(size,
+  // {4,{},{},{},{},{},8,{},5,{},3,{},{},{},{},{},{},{},{},{},{},7,{},{},{},{},{},{},2,{},{},{},{},{},6,{},{},{},{},{},8,{},4,{},{},{},{},{},{},1,{},{},{},{},{},{},{},6,{},3,{},7,{},5,{},{},2,{},{},{},{},{},1,{},4,{},{},{},{},{},{}});
+
+  // Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new
+  // SudokuSolver_bitmasks(size, size/3)),{ 3, 0, 6, 5, 0, 8, 4, 0, 0, 5, 2, 0,
+  // 0, 0, 0, 0, 0, 0, 0, 8, 7, 0, 0, 0, 0, 3, 1, 0, 0, 3, 0, 1, 0, 0, 8, 0, 9,
+  // 0, 0, 8, 6, 3, 0, 0, 5, 0, 5, 0, 0, 9, 0, 6, 0, 0, 1, 3, 0, 0, 0, 0, 2, 5,
+  // 0, 0, 0, 0, 0, 0, 0, 0, 7, 4, 0, 0, 5, 2, 0, 6, 3, 0, 0}};
   Sudoku sudoku{Sudoku(size)};
   Solver solver{size, size / 3, SolverTypes::Bitstring};
-  if(options.generate) {
+  if (options.generate) {
     Generator settings{size, sudoku.SectionSize(), std::chrono::seconds(60)};
     sudoku.GenerateSudoku(settings);
   }
@@ -94,9 +87,9 @@ int main(int argc, char *argv[]) {
   input.Init();
   input.StartInputHandler();
 
-  if(sudoku.IsSolvable()) {
+  if (sudoku.IsSolvable()) {
     Log::Debug("can be solved");
-    
+
   } else {
     Log::Debug("can NOT be solved");
   }
@@ -120,7 +113,7 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
   ArgOptions settings{};
   static struct option long_options[] = {{"help", no_argument, 0, 0},
                                          {"size", required_argument, 0, 9},
-                                        {"generate", no_argument, 0, false}};
+                                         {"generate", no_argument, 0, false}};
   int option_index{};
   while ((opt = getopt_long(argc, argv, "hs:g", long_options, &option_index)) !=
          -1) {
@@ -141,8 +134,8 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
   return settings;
 }
 
-void CreateInputMap(InputHandling::Input *pInput,
-                    Sudoku* pSudoku, SudokuMovement* pPositioner, EventQueue* pEventQueue) {
+void CreateInputMap(InputHandling::Input *pInput, Sudoku *pSudoku,
+                    SudokuMovement *pPositioner, EventQueue *pEventQueue) {
 
   using intintArg = std::pair<int, int>;
   using intintFunction = FunctionEvent<intintArg>;

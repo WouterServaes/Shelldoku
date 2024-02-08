@@ -2,7 +2,8 @@
 
 // using namespace ShelldokuPrinter;
 
-// PrinterLogic::PrinterLogic(std::size_t size) : size(size), sectionSize(size/3) {}
+// PrinterLogic::PrinterLogic(std::size_t size) : size(size),
+// sectionSize(size/3) {}
 
 // void PrinterLogic::PrintSingle(const std::string_view &str) {
 //   // get location of cursor

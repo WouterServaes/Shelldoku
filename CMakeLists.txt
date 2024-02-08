@@ -52,3 +52,9 @@ target_link_libraries(${PROJECT_NAME} ${SUDOKU_SOLVER})
 
 target_include_directories(${PROJECT_NAME} PUBLIC lib/include/public/)
 target_include_directories(${PROJECT_NAME} PUBLIC common/include/public/)
+
+target_include_directories(SUDOKU_SOLVER PUBLIC lib/include/public/)
+target_include_directories(SUDOKU_SOLVER PUBLIC common/include/public/)
+
+target_include_directories(SUDOKU_GENERATOR PUBLIC lib/include/public/)
+target_include_directories(SUDOKU_GENERATOR PUBLIC common/include/public/)

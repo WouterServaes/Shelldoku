@@ -11,7 +11,6 @@
 #include <string>
 #include <string_view>
 #include <tuple>
-#include <string_view>
 
 namespace Ansi {
 
@@ -37,7 +36,7 @@ static void BackToSaved() noexcept;
 static void Cleanup() noexcept;
 
 static void MoveUp(int l) noexcept {
-  if(l > 0)
+  if (l > 0)
     std::cout << ANSI_ESCAPE << "[" << l << "A";
 }
 static void MoveDown(int l) noexcept {
@@ -45,11 +44,11 @@ static void MoveDown(int l) noexcept {
     std::cout << ANSI_ESCAPE << "[" << l << "B";
 }
 static void MoveRight(int l) noexcept {
-  if(l >0 )
+  if (l > 0)
     std::cout << ANSI_ESCAPE << "[" << l << "C";
 }
 static void MoveLeft(int l) noexcept {
-  if(l > 0)
+  if (l > 0)
     std::cout << ANSI_ESCAPE << "[" << l << "D";
 }
 

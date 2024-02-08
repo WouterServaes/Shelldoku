@@ -7,9 +7,9 @@
 #include <cstddef>
 #include <iostream>
 #include <memory>
-#include <vector>
-#include <utility>
 #include <optional>
+#include <utility>
+#include <vector>
 
 namespace EVENT_ID {
 static const unsigned int SUDOKU_PLACE = 5;
@@ -24,12 +24,14 @@ public:
   Sudoku(std::size_t size, std::vector<SudokuValue> values);
   ~Sudoku();
   // Generates sudoku
-  void GenerateSudoku(Generator& generator);
+  void GenerateSudoku(Generator &generator);
 
   // Returns copy of values
   [[nodiscard]] const std::vector<SudokuValue> GetValues() const;
   // Returns the sudoku section size
-  [[nodiscard]] inline const std::size_t SectionSize() const { return size / 3;}
+  [[nodiscard]] inline const std::size_t SectionSize() const {
+    return size / 3;
+  }
 
   // Tries to place a value on a location
   // Returns true on success (value was placed)
@@ -44,15 +46,19 @@ public:
   void Stop();
   // Returns true if the sudoku is solved
   [[nodiscard]] bool IsSolved() const noexcept;
+
 private:
   // Sets values to Lockable values vector
   void SetValues(const std::vector<SudokuValue> values);
 
   // Returns true if value can be placed on location
-  [[nodiscard]] bool CanPlaceValue(const std::vector<LockableValue>& toPlace, ValueLocation location, SudokuValue value) const noexcept;
+  [[nodiscard]] bool CanPlaceValue(const std::vector<LockableValue> &toPlace,
+                                   ValueLocation location,
+                                   SudokuValue value) const noexcept;
 
   // Returns true if sudoku is solved
-  [[nodiscard]] bool IsSolved(const std::vector<LockableValue>& toCheck) const noexcept;
+  [[nodiscard]] bool
+  IsSolved(const std::vector<LockableValue> &toCheck) const noexcept;
 
   const std::size_t size;
   std::vector<LockableValue> values;

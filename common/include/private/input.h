@@ -39,7 +39,7 @@ public:
   bool End();
   // Adds a key string to a key code
   void AddKey(KeyString keyString, Key key);
-  // Returns the optional key code for a key string 
+  // Returns the optional key code for a key string
   std::optional<KeyCode> GetKeyCode(KeyString keyString) const noexcept;
   // blocking, listens for a key press
   [[nodiscard]] std::optional<KeyCode>

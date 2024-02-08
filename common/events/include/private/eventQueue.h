@@ -25,7 +25,8 @@ public:
   // Pushes an event on the queue
   void PushEvent(EventID id);
   // Pops events from the queue
-  // if stallThread is true, this function halts the thread untill an event is on the queue
+  // if stallThread is true, this function halts the thread untill an event is
+  // on the queue
   void HandleQueue(bool stallThread = false);
   // Returns true if queue has any listeners
   bool HasListeners();

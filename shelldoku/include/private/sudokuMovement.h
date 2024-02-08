@@ -13,6 +13,7 @@ public:
 
   // Returns the X, Y position
   [[nodiscard]] const std::pair<int, int> GetPosition() const noexcept;
+
 private:
   std::pair<int, int> cursorPosition;
   const int sectionSize;

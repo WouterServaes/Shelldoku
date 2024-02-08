@@ -7,8 +7,7 @@
 #include <string>
 
 SudokuMovement::SudokuMovement(unsigned int sectionSize)
-:cursorPosition({0,0}), sectionSize(sectionSize)
-{}
+    : cursorPosition({0, 0}), sectionSize(sectionSize) {}
 
 // positioning layout:
 // section dividers should be skipped, and are not counted as location
@@ -24,8 +23,7 @@ SudokuMovement::SudokuMovement(unsigned int sectionSize)
 // 7  │   │
 // 8  │   │
 
-void SudokuMovement::UpdatePosition(std::pair<int, int> direction)
-{
+void SudokuMovement::UpdatePosition(std::pair<int, int> direction) {
   cursorPosition.first += direction.first;
   cursorPosition.second += direction.second;
 
@@ -36,32 +34,34 @@ void SudokuMovement::UpdatePosition(std::pair<int, int> direction)
 
   posX = std::abs(posX);
   posY = std::abs(posY);
-  
+
   if (posX) {
-    if(cursorPosition.first) {
-      if(dir.first && !(cursorPosition.first % (sectionSize))) {
+    if (cursorPosition.first) {
+      if (dir.first && !(cursorPosition.first % (sectionSize))) {
         Ansi::MoveRight();
-      } else if(!dir.first && !((cursorPosition.first + 1)% (sectionSize))) {
+      } else if (!dir.first && !((cursorPosition.first + 1) % (sectionSize))) {
         Ansi::MoveLeft();
       }
     }
-    dir.first  ? Ansi::MoveRight(posX) : Ansi::MoveLeft(posX);
+    dir.first ? Ansi::MoveRight(posX) : Ansi::MoveLeft(posX);
   }
 
   if (posY) {
-    if(cursorPosition.second) {
-      if(dir.second && !((cursorPosition.second) % (sectionSize))) {
+    if (cursorPosition.second) {
+      if (dir.second && !((cursorPosition.second) % (sectionSize))) {
         Ansi::MoveDown();
-      } else if(!dir.second && !((cursorPosition.second + 1)% (sectionSize))) {
+      } else if (!dir.second &&
+                 !((cursorPosition.second + 1) % (sectionSize))) {
         Ansi::MoveUp();
       }
     }
-    dir.second ? Ansi::MoveDown(posY)  : Ansi::MoveUp(posY);
+    dir.second ? Ansi::MoveDown(posY) : Ansi::MoveUp(posY);
   }
 }
 
-[[nodiscard]] const std::pair<int, int> SudokuMovement::GetPosition() const noexcept
-{
-  //Log::Debug(std::string("position:") + std::to_string(cursorPosition.first) + ", " + std::to_string(cursorPosition.second));
+[[nodiscard]] const std::pair<int, int>
+SudokuMovement::GetPosition() const noexcept {
+  // Log::Debug(std::string("position:") + std::to_string(cursorPosition.first)
+  // + ", " + std::to_string(cursorPosition.second));
   return cursorPosition;
 }

@@ -19,7 +19,8 @@ static std::size_t FillCout(std::size_t size);
 static void PrintDividers(std::size_t size);
 // Prints the sudoku
 // None-existing vector values are printed as a space
-static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values, std::size_t size);
+static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values,
+                        std::size_t size);
 // Flag indicating if cout is filled, should be replaced by some clean check
 static bool CoutFilled{false};
 // Prints str and returns cursor to before printed str
@@ -48,7 +49,7 @@ static std::size_t FillCout(std::size_t size) {
     }
   }
   CoutFilled = true;
-  // 
+  //
   return size + 2;
 }
 
@@ -79,26 +80,27 @@ static void PrintDividers(std::size_t size) {
   }
 }
 
-static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values, std::size_t size) {
+static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values,
+                        std::size_t size) {
   const std::size_t sectionSize{size / 3};
-  
-  for(std::size_t idx{}; idx < values.size(); idx++) {
+
+  for (std::size_t idx{}; idx < values.size(); idx++) {
     // vertical spaces
-    if(idx > 0 && !(idx % sectionSize) && (idx % size)) {
+    if (idx > 0 && !(idx % sectionSize) && (idx % size)) {
       Ansi::MoveRight();
-    } 
+    }
     // horizontal spacer
-    if(idx > 0 && !(idx % (size * sectionSize))) {
+    if (idx > 0 && !(idx % (size * sectionSize))) {
       Ansi::MoveDown();
     }
     // enters afters every row
-    if(idx > 0 && !(idx % size)) {
+    if (idx > 0 && !(idx % size)) {
       Ansi::MoveDown();
       Ansi::MoveLeft(size + sectionSize);
     }
     // value printing
     const auto v{values[idx]};
-    std::cout << (v.has_value() ? std::to_string(v.value()) :" ");
+    std::cout << (v.has_value() ? std::to_string(v.value()) : " ");
   }
 
   Ansi::BackToSaved();
@@ -106,18 +108,16 @@ static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values, 
   Ansi::BackToSaved();
 }
 
-static void PrintSingle(const std::string_view &str)
-{
-  std::cout<<str;
+static void PrintSingle(const std::string_view &str) {
+  std::cout << str;
   Ansi::MoveLeft(str.size());
 }
 
-static void PrepareSudokuField(std::size_t size)
-{
+static void PrepareSudokuField(std::size_t size) {
   std::cout << std::endl;
   std::cout << std::endl;
-  auto sizeFromTop {FillCout(size)};
-  while(sizeFromTop--) {
+  auto sizeFromTop{FillCout(size)};
+  while (sizeFromTop--) {
     Ansi::MoveUp();
   }
   Ansi::SaveCursorPos();
