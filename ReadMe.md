@@ -11,3 +11,11 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=$CXX . -B build/debug
 
 For working intellisense/clangd in VScode the compile_arguments are generated using the cmake flag DCMAKE_EXPORT_COMPILE_COMMANDS: set(DCMAKE_EXPORT_COMPILE_COMMANDS ON),
 the generated compile_commands.json should then be moved to the root workspace folder, and VS code should then be restarted to fix all visual include-related errors.
+
+
+
+# Shelldoku
+sudo in terminal
+
+# Shelldoku generator
+sudo generator
