@@ -39,12 +39,17 @@ bool SudokuGenerator_::Generate(Generator &generator) {
   solver.values = generator.values;
   auto startT{std::chrono::steady_clock::now()};
 
+  auto timeleft{std::chrono::steady_clock::now() - startT};
   do {
+    timeleft = std::chrono::steady_clock::now() - startT;
     Shuffle(generator);
-  } while (pSudokuSolver->ValidateSudoku(solver) 
-        && generator.maxGenerationTime < (std::chrono::steady_clock::now() - startT));
-
-  return true;
+    if (pSudokuSolver->ValidateSudoku(solver)) {
+      Log::Debug("validated sudoku!");
+      return true;
+    }
+  } while (generator.maxGenerationTime > timeleft);
+  Log::Debug("Unable to generate sudoku in time...");
+  return false;
 }
 
 void SudokuGenerator_::Shuffle(Generator &generator) {
