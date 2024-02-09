@@ -1,7 +1,7 @@
-#include "include/public/sudokuSolver.h"
-#include "include/private/sudokuSolver_.h"
+#include "sudokuSolver.h"
+#include "sudokuSolver_.h"
 
-#include "include/public/sudokuHelpers.h"
+#include "sudokuHelpers.h"
 
 #include <memory>
 #include <stdexcept>

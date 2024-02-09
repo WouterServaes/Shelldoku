@@ -1,5 +1,5 @@
 #pragma once
-#include "../public/sudokuHelpers.h"
+#include "sudokuHelpers.h"
 #include <vector>
 
 class Solver;

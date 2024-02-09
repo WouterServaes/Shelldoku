@@ -15,7 +15,7 @@ the generated compile_commands.json should then be moved to the root workspace f
 
 
 # Shelldoku
-sudo in terminal
+sudoku in terminal
 
 # Shelldoku generator
-sudo generator
+sudoku generator

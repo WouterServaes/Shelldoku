@@ -1,6 +1,6 @@
 #pragma once
-#include "../public/sudokuHelpers.h"
-#include "../public/sudokuSolver.h"
+#include "sudokuHelpers.h"
+#include "sudokuSolver.h"
 
 #include <cstddef>
 #include <memory>

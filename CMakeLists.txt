@@ -26,25 +26,20 @@ mark_as_advanced(SYSTEMD_INCLUDE_DIRS SYSTEMD_LIBRARIES)
 #=========== COMPILE COMMANDS?
 set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+#=========== FILE GLOBS AND VARIABLES
+file(GLOB COMMON common/*.cpp common/events/*.cpp)
+set(PUBLIC_INCLUDE_DIRS_APPS ../lib/include/public/ ../common/include/public/ ../common/events/include/public/)
+
 #=========== LIBRARIES
 add_library(SUDOKU_SOLVER SHARED lib/sudokuSolver.cpp)
 add_library(SUDOKU_GENERATOR SHARED lib/sudokuGenerator.cpp)
 # link solver to generator, generator needs to solve
-target_link_libraries(SUDOKU_GENERATOR ${SUDOKU_SOLVER})
+target_link_libraries(SUDOKU_GENERATOR SUDOKU_SOLVER)
 
-#=========== FILE GLOBS AND VARIABLES
-file(GLOB COMMON common/*.cpp common/events/*.cpp)
-# Is this not done by linking the library? 
-file(GLOB LIBRARY_CPP lib/*.cpp)
 set(PUBLIC_INCLUDE_DIRS lib/include/public/ common/include/public/ common/events/include/public/)
-set(PUBLIC_INCLUDE_DIRS_APPS ../lib/include/public/ ../common/include/public/ ../common/events/include/public/)
-set(PRIVATE_INCLUDE_DIRS lib/include/private)
-
-#============ INCLUDE DIRECTORIES
-target_include_directories(SUDOKU_SOLVER PUBLIC ${PUBLIC_INCLUDE_DIRS})
-target_include_directories(SUDOKU_SOLVER PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
-target_include_directories(SUDOKU_GENERATOR PUBLIC ${PUBLIC_INCLUDE_DIRS}) 
-target_include_directories(SUDOKU_GENERATOR PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
+set(PRIVATE_INCLUDE_DIRS lib/include/private/)
+target_include_directories(SUDOKU_SOLVER PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS})
+target_include_directories(SUDOKU_GENERATOR PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
 
 #============ SUBDIRECTORIES
 add_subdirectory(shelldoku)

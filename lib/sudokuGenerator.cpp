@@ -1,8 +1,8 @@
-#include "include/public/sudokuGenerator.h"
-#include "include/private/sudokuGenerator_.h"
+#include "sudokuGenerator.h"
+#include "sudokuGenerator_.h"
 
-#include "include/public/sudokuHelpers.h"
-#include "include/public/sudokuSolver.h"
+#include "sudokuHelpers.h"
+#include "sudokuSolver.h"
 
 #include "logger.h"
 
