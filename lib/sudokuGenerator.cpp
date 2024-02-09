@@ -24,6 +24,23 @@ SudokuGenerator::~SudokuGenerator() {
 }
 
 bool SudokuGenerator::Generate(Generator &generator) {
+  if (generator.values.empty() ||
+      (generator.values.size() != (generator.size * generator.size))) {
+    generator.values.resize(generator.size * generator.size);
+    const auto sectionSize{generator.sectionSize};
+    for (int idx{}; idx < generator.size; idx++) {
+      int counter{1};
+      std::for_each_n(generator.values.begin() + (idx * generator.size),
+                      generator.size,
+                      [&counter, idx, sectionSize](auto &value) {
+                        // 1 2 3
+                        value = ((counter - 1) % sectionSize) + 1;
+                        // increase 1 2 3 by 3 according to row
+                        value.value() += (idx % sectionSize) * sectionSize;
+                        counter++;
+                      });
+    }
+  }
   return pSudokuGenerator->Generate(generator);
 }
 

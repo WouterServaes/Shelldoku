@@ -1,4 +1,5 @@
 #include "sudokuSolver.h"
+#include "logger.h"
 #include "sudokuSolver_.h"
 
 #include "sudokuHelpers.h"
@@ -20,17 +21,29 @@ SudokuSolver::~SudokuSolver() {
 }
 
 bool SudokuSolver::CanBeSolved(const Solver &solver) {
+  if (solver.values.empty()) {
+    Log::Debug("Empty sudoku can't be solved...");
+    return false;
+  }
   InitiateSolver(solver.solvertType);
   return pSudokuSolver->CanBeSolved(solver);
 }
 
 bool SudokuSolver::CanBePlaced(const Solver &solver, ValueLocation location,
                                SudokuValue value) {
+  if (solver.values.empty()) {
+    Log::Debug("Can't place on an empty grid...");
+    return false;
+  }
   InitiateSolver(solver.solvertType);
   return pSudokuSolver->CanBePlaced(solver, location, value);
 }
 
 bool SudokuSolver::ValidateSudoku(const Solver &solver) {
+  if (solver.values.empty()) {
+    Log::Debug("Solver can't validate empty sudoku...");
+    return false;
+  }
   InitiateSolver(solver.solvertType);
   return pSudokuSolver->ValidateSudoku(solver);
 }
@@ -49,6 +62,10 @@ void SudokuSolver::InitiateSolver(const SolverTypes solverType) {
 }
 
 bool SudokuSolver::Solve(Solver &solver) {
+  if (solver.values.empty()) {
+    Log::Debug("Solver solved empty sudoku...");
+    return true;
+  }
   InitiateSolver(solver.solvertType);
   return pSudokuSolver->Solve(solver);
 }

@@ -48,22 +48,7 @@ Sudoku::Sudoku(std::size_t _size)
       pSudokuSolver(std::unique_ptr<SudokuSolver>(new SudokuSolver())),
       pSudokuGenerator(
           std::unique_ptr<SudokuGenerator>(new SudokuGenerator())) {
-  values.resize(size * size);
-  const auto sectionSize{SectionSize()};
-  // fill the entire sudoku to start with
-  for (int idx{}; idx < size; idx++) {
-    int counter{1};
 
-    std::for_each_n(values.begin() + (idx * size), size,
-                    [&counter, idx, sectionSize](LockableValue &value) {
-                      // 1 2 3
-                      value.second = ((counter - 1) % sectionSize) + 1;
-                      // increase 1 2 3 by 3 according to row
-                      value.second.value() += (idx % sectionSize) * sectionSize;
-                      counter++;
-                      value.first = false;
-                    });
-  }
   //   for(unsigned int r{}; r < size; r++) {
   //   for(unsigned int c{}; c < size; c++) {
   //     // const auto value = values.at(XYToSudokuPos(size, {c,r}));
@@ -108,12 +93,14 @@ void Sudoku::GenerateSudoku(Generator &generator) {
   generator.values = GetValues();
   if (!pSudokuGenerator->Generate(generator)) {
     Log::Debug("Unable to generate");
-    return;
   }
   SetValues(generator.values);
 }
 
 const std::vector<SudokuValue> Sudoku::GetValues() const {
+  if (values.empty()) {
+    return {};
+  }
   std::vector<SudokuValue> c;
   c.resize(values.size());
   auto cIt{c.begin()};
@@ -125,6 +112,7 @@ const std::vector<SudokuValue> Sudoku::GetValues() const {
 }
 
 void Sudoku::SetValues(const std::vector<SudokuValue> _values) {
+  values.resize(_values.size());
   auto cIt{_values.begin()};
   auto vIt{values.begin()};
   for (; cIt != _values.end() && vIt != values.end(); cIt++, vIt++) {
