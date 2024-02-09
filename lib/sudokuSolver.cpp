@@ -4,10 +4,6 @@
 
 #include "sudokuHelpers.h"
 
-#include <memory>
-#include <stdexcept>
-#include <string>
-
 //================
 // public library functions
 ///================

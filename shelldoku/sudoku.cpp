@@ -1,15 +1,10 @@
 #include "sudoku.h"
-#include "shelldokuPrinter.h"
 
 #include "logger.h"
 
-#include <chrono>
+#include <algorithm>
 #include <cstddef>
-#include <iterator>
-#include <math.h>
 #include <memory>
-#include <string>
-#include <thread>
 #include <vector>
 
 // https://norvig.com/sudoku.html

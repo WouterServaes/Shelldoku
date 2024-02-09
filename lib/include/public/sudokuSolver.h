@@ -1,6 +1,5 @@
 #pragma once
 #include "sudokuHelpers.h"
-#include <memory>
 #include <vector>
 
 class SudokuSolver_;

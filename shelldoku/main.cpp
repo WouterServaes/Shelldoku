@@ -14,26 +14,14 @@
 #include "sudokuGenerator.h"
 #include "sudokuSolver.h"
 
-#include <algorithm>
-#include <array>
 #include <chrono>
-#include <cmath>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <functional>
 #include <getopt.h>
 #include <iostream>
 #include <memory>
-#include <optional>
 #include <ostream>
 #include <pthread.h>
-#include <random>
 #include <string>
-#include <string_view>
-#include <thread>
-#include <vector>
 
 struct ArgOptions {
   unsigned int size{9};
