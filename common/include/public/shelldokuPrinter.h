@@ -1,12 +1,10 @@
 #pragma once
 
 #include "ansi.h"
-#include "logger.h"
 
-#include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -106,6 +104,16 @@ static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values,
   Ansi::BackToSaved();
   PrintDividers(size);
   Ansi::BackToSaved();
+}
+
+static void
+PrintSingleLine(const std::vector<std::optional<unsigned int>> &values) {
+  std::string str{};
+  for (const auto &v : values) {
+    std::string strV{(v.has_value() ? std::to_string(v.value()) : "0")};
+    str += strV + " ";
+  }
+  std::cout << str << std::endl;
 }
 
 static void PrintSingle(const std::string_view &str) {

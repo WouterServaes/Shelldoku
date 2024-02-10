@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
   Solver solver{size, size / 3, SolverTypes::Bitstring};
   if (options.generate) {
     Generator settings{size, sudoku.SectionSize(), std::chrono::seconds(60),
-                       GeneratorTypes::Shuffle};
+                       GeneratorTypes::Shift};
     sudoku.GenerateSudoku(settings);
   }
 

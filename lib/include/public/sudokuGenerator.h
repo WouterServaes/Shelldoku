@@ -35,7 +35,6 @@ public:
   [[nodiscard]] unsigned int TotalTries() const;
 
 private:
-  void Fill(Generator &generator);
-  void InitiateGenerator(const GeneratorTypes generatorType);
+  void InitiateGenerator(Generator &generator);
   std::unique_ptr<SudokuGenerator_> pSudokuGenerator;
 };

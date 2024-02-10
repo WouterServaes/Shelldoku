@@ -1,16 +1,10 @@
 // https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 #pragma once
 
-#include <cstdint>
-#include <functional>
 #include <iostream>
-#include <istream>
 #include <linux/input-event-codes.h>
-#include <map>
-#include <optional>
 #include <string>
 #include <string_view>
-#include <tuple>
 
 namespace Ansi {
 

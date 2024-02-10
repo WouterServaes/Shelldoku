@@ -1,4 +1,3 @@
-#include "logger.h"
 #include "sudokuGenerator.h"
 #include "sudokuHelpers.h"
 #include <chrono>
@@ -17,13 +16,12 @@ struct ArgOptions {
 [[nodiscard]] ArgOptions ParseArgs(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
-  Log::Debug("hello world");
   const auto options{ParseArgs(argc, argv)};
 
   auto generation{[options]() {
     SudokuGenerator sudokuGenerator{};
     Generator generator{options.size, options.size / 3, options.maxRunTime,
-                        GeneratorTypes::Shuffle};
+                        GeneratorTypes::Shift};
     std::string msg{"generation "};
     if (sudokuGenerator.Generate(generator)) {
       msg += "complete";
@@ -33,6 +31,11 @@ int main(int argc, char *argv[]) {
     msg += std::string(" - after ") +
            std::to_string(sudokuGenerator.TotalTries()) + " tries";
     std::cout << msg << std::endl;
+    // ShelldokuPrinter::PrintSingleLine(generator.values);
+    // Ansi::SaveCursorPos();
+    // ShelldokuPrinter::FillCout(generator.size);
+    // Ansi::BackToSaved();
+    // ShelldokuPrinter::PrintSudoku(generator.values, generator.size);
   }};
 
   std::vector<std::thread> threads;
@@ -44,6 +47,7 @@ int main(int argc, char *argv[]) {
   for (auto &thr : threads) {
     thr.join();
   }
+  std::cin.get();
 }
 
 ArgOptions ParseArgs(int argc, char *argv[]) {
