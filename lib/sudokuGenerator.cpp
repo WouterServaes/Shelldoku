@@ -96,7 +96,6 @@ bool SudokuGenerator_::Generate(Generator &generator) {
       Log::Debug("validated sudoku!");
       return true;
     }
-    return false;
     generator.values = oValues;
   } while (generator.maxGenerationTime > timeleft);
   Log::Debug("Unable to generate sudoku in time...");
