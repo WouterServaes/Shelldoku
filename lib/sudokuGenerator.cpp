@@ -11,27 +11,56 @@
 #include <memory>
 #include <random>
 
+//===============
+// private generator functions
+///===============
+void None(Generator &){};
+void Shuffle(Generator &generator);
+void Shift(Generator &generator);
 //================
 // public library functions
 ///================
 
-SudokuGenerator::SudokuGenerator() : pSudokuGenerator(new SudokuGenerator_()) {}
+SudokuGenerator::SudokuGenerator()
+    : pSudokuGenerator(std::make_unique<SudokuGenerator_>()) {}
 
-SudokuGenerator::~SudokuGenerator() {
-  if (pSudokuGenerator) {
-    delete pSudokuGenerator;
+SudokuGenerator::~SudokuGenerator() {}
+
+bool SudokuGenerator::Generate(Generator &generator) {
+  Fill(generator);
+  InitiateGenerator(generator.generatorType);
+  return pSudokuGenerator->Generate(generator);
+}
+
+unsigned int SudokuGenerator::TotalTries() const {
+  return pSudokuGenerator->TotalTries();
+}
+
+void SudokuGenerator::InitiateGenerator(const GeneratorTypes generatorType) {
+
+  switch (generatorType) {
+  case GeneratorTypes::Shuffle:
+    pSudokuGenerator->SetGenerateFunction(Shuffle);
+    break;
+  case GeneratorTypes::Shift:
+    pSudokuGenerator->SetGenerateFunction(Shift);
+    break;
+  case GeneratorTypes::None:
+    pSudokuGenerator->SetGenerateFunction(None);
+  default:
+    break;
   }
 }
 
-bool SudokuGenerator::Generate(Generator &generator) {
+void SudokuGenerator::Fill(Generator &generator) {
   if (generator.values.empty() ||
       (generator.values.size() != (generator.size * generator.size))) {
     generator.values.resize(generator.size * generator.size);
     const auto sectionSize{generator.sectionSize};
     for (int idx{}; idx < generator.size; idx++) {
       int counter{1};
-      std::for_each_n(generator.values.begin() + (idx * generator.size),
-                      generator.size,
+      auto itBegin{generator.values.begin() + (idx * generator.size)};
+      std::for_each_n(itBegin, generator.size,
                       [&counter, idx, sectionSize](auto &value) {
                         // 1 2 3
                         value = ((counter - 1) % sectionSize) + 1;
@@ -41,7 +70,6 @@ bool SudokuGenerator::Generate(Generator &generator) {
                       });
     }
   }
-  return pSudokuGenerator->Generate(generator);
 }
 
 //================
@@ -49,7 +77,19 @@ bool SudokuGenerator::Generate(Generator &generator) {
 ///================
 
 SudokuGenerator_::SudokuGenerator_()
-    : pSudokuSolver(std::make_unique<SudokuSolver>()) {}
+    : pSudokuSolver(std::make_unique<SudokuSolver>()), generateFunction(None) {}
+
+SudokuGenerator_::SudokuGenerator_(
+    std::function<void(Generator &)> generateFunction_)
+    : pSudokuSolver(std::make_unique<SudokuSolver>()),
+      generateFunction(generateFunction_) {}
+
+unsigned int SudokuGenerator_::TotalTries() const { return totalTries; }
+
+void SudokuGenerator_::SetGenerateFunction(
+    std::function<void(Generator &)> generateFunction_) {
+  generateFunction = generateFunction_;
+}
 
 bool SudokuGenerator_::Generate(Generator &generator) {
   Solver solver(generator.size, generator.sectionSize, SolverTypes::Bitstring);
@@ -59,8 +99,9 @@ bool SudokuGenerator_::Generate(Generator &generator) {
   auto timeleft{std::chrono::steady_clock::now() - startT};
   Log::Debug("Starting sudoku generation...");
   do {
+    totalTries++;
     timeleft = std::chrono::steady_clock::now() - startT;
-    Shuffle(generator);
+    generateFunction(generator);
     if (pSudokuSolver->ValidateSudoku(solver)) {
       Log::Debug("validated sudoku!");
       return true;
@@ -70,7 +111,10 @@ bool SudokuGenerator_::Generate(Generator &generator) {
   return false;
 }
 
-void SudokuGenerator_::Shuffle(Generator &generator) {
+//===============
+// private generator functions
+///===============
+void Shuffle(Generator &generator) {
   std::random_device rd;
   std::mt19937_64 g(rd());
 
@@ -85,5 +129,20 @@ void SudokuGenerator_::Shuffle(Generator &generator) {
       generator.values[originalIdxs[idx]] = v2;
       generator.values[idxs[idx]] = v1;
     }
+  }
+}
+
+void Shift(Generator &generator) {
+  // randomize first row
+  // set second row by shifting first row by n1
+  // set third row by shifting seconds row by n1
+
+  // set fourth row by shifting third row by 1
+  // set fifth row by shifting fourth row by n2
+  //  ...
+  for (std::size_t idx{}; idx < generator.size; idx++) {
+
+    // auto itBegin{generator.values.begin() + (idx * generator.size)};
+    // std::for_each_n(itBegin, generator.size, [idx](){});
   }
 }

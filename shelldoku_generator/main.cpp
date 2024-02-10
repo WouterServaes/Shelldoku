@@ -1,5 +1,6 @@
 #include "logger.h"
 #include "sudokuGenerator.h"
+#include "sudokuHelpers.h"
 #include <chrono>
 #include <getopt.h>
 #include <iostream>
@@ -10,8 +11,7 @@
 struct ArgOptions {
   unsigned int size{9};
   unsigned int threads{1};
-  unsigned int maxTries{99};
-  std::chrono::seconds maxRunTime{100};
+  std::chrono::seconds maxRunTime{5};
 };
 
 [[nodiscard]] ArgOptions ParseArgs(int argc, char *argv[]);
@@ -19,19 +19,31 @@ struct ArgOptions {
 int main(int argc, char *argv[]) {
   Log::Debug("hello world");
   const auto options{ParseArgs(argc, argv)};
-  Generator generator{options.size, options.size / 3, options.maxRunTime};
 
-  std::thread generationThread([&generator, options]() {
+  auto generation{[options]() {
     SudokuGenerator sudokuGenerator{};
+    Generator generator{options.size, options.size / 3, options.maxRunTime,
+                        GeneratorTypes::Shuffle};
+    std::string msg{"generation "};
     if (sudokuGenerator.Generate(generator)) {
-      std::cout << "generation complete";
+      msg += "complete";
     } else {
-      std::cout << "generaton failed";
+      msg += "failed";
     }
-    std::cout << " - thread: " << std::this_thread::get_id() << std::endl;
-  });
+    msg += std::string(" - after ") +
+           std::to_string(sudokuGenerator.TotalTries()) + " tries";
+    std::cout << msg << std::endl;
+  }};
 
-  generationThread.join();
+  std::vector<std::thread> threads;
+  threads.resize(options.threads);
+  for (auto &thr : threads) {
+    thr = std::thread(generation);
+  }
+
+  for (auto &thr : threads) {
+    thr.join();
+  }
 }
 
 ArgOptions ParseArgs(int argc, char *argv[]) {
@@ -41,10 +53,9 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
       {"help", no_argument, 0, 0},
       {"size", required_argument, 0, 9},
       {"threads", required_argument, 0, 1},
-      {"maxTries", required_argument, 0, 99},
       {"maxRunTime", required_argument, 0, 100}};
   int option_index{};
-  while ((opt = getopt_long(argc, argv, "hs:j:r:t:", long_options,
+  while ((opt = getopt_long(argc, argv, "hs:j:t:", long_options,
                             &option_index)) != -1) {
     switch (opt) {
     case 'h':
@@ -55,9 +66,6 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
       break;
     case 'j':
       options.threads = std::stoi(optarg);
-      break;
-    case 'r':
-      options.maxTries = std::stoi(optarg);
       break;
     case 't':
       options.maxRunTime = std::chrono::seconds(std::stoi(optarg));

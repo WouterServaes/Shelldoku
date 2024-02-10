@@ -1,5 +1,6 @@
 #pragma once
 #include "sudokuHelpers.h"
+#include <memory>
 #include <vector>
 
 class SudokuSolver_;
@@ -33,5 +34,5 @@ public:
 
 private:
   void InitiateSolver(const SolverTypes solverType);
-  SudokuSolver_ *pSudokuSolver;
+  std::unique_ptr<SudokuSolver_> pSudokuSolver;
 };

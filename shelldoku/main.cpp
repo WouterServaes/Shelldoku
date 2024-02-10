@@ -9,6 +9,7 @@
 
 #include "shelldokuPrinter.h"
 #include "sudoku.h"
+#include "sudokuHelpers.h"
 #include "sudokuMovement.h"
 
 #include "sudokuGenerator.h"
@@ -61,7 +62,8 @@ int main(int argc, char *argv[]) {
   Sudoku sudoku{Sudoku(size)};
   Solver solver{size, size / 3, SolverTypes::Bitstring};
   if (options.generate) {
-    Generator settings{size, sudoku.SectionSize(), std::chrono::seconds(60)};
+    Generator settings{size, sudoku.SectionSize(), std::chrono::seconds(60),
+                       GeneratorTypes::Shuffle};
     sudoku.GenerateSudoku(settings);
   }
 

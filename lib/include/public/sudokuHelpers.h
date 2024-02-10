@@ -1,9 +1,9 @@
 #pragma once
 #include <optional>
-#include <tuple>
 #include <vector>
 
 enum class SolverTypes { None = 0, Bitstring = 1 };
+enum class GeneratorTypes { None = 0, Shuffle = 1, Shift = 2 };
 
 // X Y location
 using X = std::size_t;

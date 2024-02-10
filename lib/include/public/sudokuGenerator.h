@@ -1,6 +1,7 @@
 #pragma once
 #include "sudokuHelpers.h"
 #include <chrono>
+#include <memory>
 #include <vector>
 
 class SudokuGenerator_;
@@ -8,14 +9,16 @@ class SudokuGenerator_;
 struct Generator {
   Generator() = delete;
   Generator(const std::size_t size_, const std::size_t sectionSize_,
-            std::chrono::seconds maxGenerationTime_)
+            std::chrono::seconds maxGenerationTime_,
+            GeneratorTypes generatorType_)
       : size(size_), sectionSize(sectionSize_),
-        maxGenerationTime(maxGenerationTime_) {}
+        maxGenerationTime(maxGenerationTime_), generatorType(generatorType_) {}
 
   std::vector<SudokuValue> values{};
   const std::size_t size;
   const std::size_t sectionSize;
 
+  const GeneratorTypes generatorType;
   std::chrono::seconds maxGenerationTime;
 };
 
@@ -29,7 +32,10 @@ public:
   SudokuGenerator &operator=(SudokuGenerator &&) = delete;
 
   [[nodiscard]] bool Generate(Generator &generator);
+  [[nodiscard]] unsigned int TotalTries() const;
 
 private:
-  SudokuGenerator_ *pSudokuGenerator;
+  void Fill(Generator &generator);
+  void InitiateGenerator(const GeneratorTypes generatorType);
+  std::unique_ptr<SudokuGenerator_> pSudokuGenerator;
 };

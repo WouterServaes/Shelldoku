@@ -3,6 +3,7 @@
 #include "sudokuSolver_.h"
 
 #include "sudokuHelpers.h"
+#include <memory>
 
 //================
 // public library functions
@@ -10,11 +11,7 @@
 
 SudokuSolver::SudokuSolver() : pSudokuSolver(nullptr) {}
 
-SudokuSolver::~SudokuSolver() {
-  if (pSudokuSolver) {
-    delete pSudokuSolver;
-  }
-}
+SudokuSolver::~SudokuSolver() {}
 
 bool SudokuSolver::CanBeSolved(const Solver &solver) {
   if (solver.values.empty()) {
@@ -45,13 +42,15 @@ bool SudokuSolver::ValidateSudoku(const Solver &solver) {
 }
 
 void SudokuSolver::InitiateSolver(const SolverTypes solverType) {
-  if (pSudokuSolver == nullptr) {
-    pSudokuSolver = new SudokuSolver_bitmasks();
+  if (pSudokuSolver != nullptr && pSudokuSolver->solverType == solverType) {
+    return;
   }
 
   switch (solverType) {
-  default:
   case SolverTypes::Bitstring:
+    pSudokuSolver = std::make_unique<SudokuSolver_bitmasks>();
+    break;
+  default:
   case SolverTypes::None:
     break;
   }
