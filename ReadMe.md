@@ -13,6 +13,8 @@ For working intellisense/clangd in VScode the compile_arguments are generated us
 the generated compile_commands.json should then be moved to the root workspace folder, and VS code should then be restarted to fix all visual include-related errors.
 
 
+https://www.sudokuwiki.org/sudoku.htm      
+https://zhangroup.aporc.org/images/files/Paper_3485.pdf
 
 # Shelldoku
 sudoku in terminal

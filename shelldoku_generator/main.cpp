@@ -1,3 +1,4 @@
+#include "shelldokuPrinter.h"
 #include "sudokuGenerator.h"
 #include "sudokuHelpers.h"
 #include <chrono>

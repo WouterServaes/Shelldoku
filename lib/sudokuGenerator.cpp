@@ -16,11 +16,13 @@
 //===============
 // private generator functions
 ///===============
+enum class FillStyle { RowBased, SquareBased };
+
 void None(Generator &){};
 void Shuffle(Generator &generator);
 void Shift(Generator &generator);
 
-void Fill(Generator &generator, bool squareBased);
+void Fill(Generator &generator, FillStyle squareBased);
 
 //================
 // public library functions
@@ -41,22 +43,24 @@ unsigned int SudokuGenerator::TotalTries() const {
 }
 
 void SudokuGenerator::InitiateGenerator(Generator &generator) {
-  auto squareBased{false};
+  FillStyle fillStyle{};
   switch (generator.generatorType) {
   case GeneratorTypes::Shuffle:
     pSudokuGenerator->SetGenerateFunction(Shuffle);
-    squareBased = true;
+    fillStyle = FillStyle::SquareBased;
     break;
   case GeneratorTypes::Shift:
     pSudokuGenerator->SetGenerateFunction(Shift);
+    fillStyle = FillStyle::RowBased;
     break;
   case GeneratorTypes::None:
     pSudokuGenerator->SetGenerateFunction(None);
   default:
     break;
   }
-  Fill(generator, squareBased);
+  Fill(generator, fillStyle);
 }
+
 //================
 // private library functions
 ///================
@@ -103,28 +107,46 @@ bool SudokuGenerator_::Generate(Generator &generator) {
 // private generator functions
 ///===============
 
-void Fill(Generator &generator, bool squareBased) {
+void Fill(Generator &generator, FillStyle fillStyle) {
   if (generator.values.empty() ||
       (generator.values.size() != (generator.size * generator.size))) {
     generator.values.resize(generator.size * generator.size);
     const auto sectionSize{generator.sectionSize};
-    for (auto idx :
-         std::ranges::iota_view(0, static_cast<int>(generator.size))) {
-      auto itBegin{generator.values.begin() + (idx * generator.size)};
-      if (squareBased) {
-        int counter{1};
-        std::for_each_n(itBegin, generator.size,
-                        [&counter, idx, sectionSize](auto &value) {
-                          // 1 2 3
-                          value = ((counter - 1) % sectionSize) + 1;
-                          value.value() += (idx % sectionSize) * sectionSize;
-                          // increase 1 2 3 by 3 according to row
-                          counter++;
-                        });
-      } else {
-        std::iota(itBegin, itBegin + generator.size, 1);
-      }
+
+    std::function<int()> g{};
+    switch (fillStyle) {
+    case FillStyle::SquareBased:
+      g = [sectionSize]() -> int {
+        static int r{0};
+        static int c{0};
+        if (r == 9) {
+          r = 0;
+        }
+        if (c == 9) {
+          r++;
+          c = 0;
+        }
+
+        auto v = ((++c - 1) % sectionSize) + 1;
+        v += ((r % sectionSize) * sectionSize);
+
+        return v;
+      };
+
+      break;
+    case FillStyle::RowBased:
+    default:
+      g = []() -> int {
+        static int c{0};
+        if (c == 9) {
+          c = 0;
+        }
+        return ++c;
+      };
+      break;
     }
+
+    std::ranges::generate(generator.values, g);
   }
 }
 
@@ -155,11 +177,13 @@ void Shift(Generator &generator) {
   // set fourth row by shifting third row by 1
   // set fifth row by shifting fourth row by n2
   //  ...
+  // https://gamedev.stackexchange.com/a/138228
+  // randomize the first row
   std::random_device rd;
   std::mt19937_64 g{rd()};
   std::shuffle(generator.values.begin(),
                generator.values.begin() + generator.size, g);
-
+  // shift each row by some amount
   std::array<std::pair<int, int>, 8> lineShiftOrder{
       {{1, 3}, {2, 3}, {3, 1}, {4, 3}, {5, 3}, {6, 1}, {7, 3}, {8, 3}}};
 
