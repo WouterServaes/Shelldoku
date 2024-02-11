@@ -1,5 +1,8 @@
 #pragma once
+#include <algorithm>
+#include <cstddef>
 #include <optional>
+#include <ranges>
 #include <vector>
 
 enum class SolverTypes { None = 0, Bitstring = 1 };
@@ -80,24 +83,33 @@ GetAllIndexesOfSquare(const std::size_t size, const std::size_t sectionSize,
   if (!idxOfSqr.has_value()) {
     return {};
   }
-  std::vector<std::size_t> allIndexes;
-  allIndexes.resize(size);
+  std::vector<std::size_t> allIndexes(size, idxOfSqr.value());
+  int rowIdx{};
+  std::ranges::for_each(std::ranges::iota_view(0, static_cast<int>(size)),
+                        [&allIndexes, &rowIdx, size, sectionSize](auto idx) {
+                          // move column
+                          allIndexes[idx] += (idx % sectionSize);
+                          // move row
+                          if (idx && !(idx % sectionSize)) {
+                            rowIdx++;
+                          }
+                          allIndexes[idx] += rowIdx * size;
+                        });
 
-  int r{0};
-  for (int idx{}; idx < size; idx++) {
-    // base index
-    allIndexes[idx] = idxOfSqr.value();
-    // move column
-    allIndexes[idx] += (idx % sectionSize);
-    // move row
-    if (idx && !(idx % sectionSize)) {
-      r++;
-    }
-    allIndexes[idx] += r * size;
-  }
   return allIndexes;
 }
 
+[[nodiscard]] static const std::vector<std::size_t>
+GetAllIndexesOfColumn(const std::size_t size, const std::size_t column) {
+  std::vector<std::size_t> r{};
+  r.resize(size);
+  std::size_t i{};
+  std::ranges::generate(r, [size, column, &i]() {
+    return XYToSudokuPos(size, {column, i++});
+  });
+
+  return r;
+}
 // static void ValidatePositionConverterFunctions() {
 //   for(unsigned int r{}; r < size; r++) {
 //     for(unsigned int c{}; c < size; c++) {

@@ -2,6 +2,7 @@
 
 #include "ansi.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <optional>
@@ -109,10 +110,15 @@ static void PrintSudoku(const std::vector<std::optional<unsigned int>> &values,
 static void
 PrintSingleLine(const std::vector<std::optional<unsigned int>> &values) {
   std::string str{};
-  for (const auto &v : values) {
+  int idx{};
+  std::for_each(values.begin(), values.end(), [&str, &idx](auto v) {
     std::string strV{(v.has_value() ? std::to_string(v.value()) : "0")};
     str += strV + " ";
-  }
+    idx++;
+    if (!(idx % 9)) {
+      str += "| ";
+    }
+  });
   std::cout << str << std::endl;
 }
 

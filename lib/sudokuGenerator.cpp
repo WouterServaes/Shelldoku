@@ -1,12 +1,13 @@
 #include "sudokuGenerator.h"
+#include "shelldokuPrinter.h"
 #include "sudokuGenerator_.h"
-
 #include "sudokuHelpers.h"
 #include "sudokuSolver.h"
 
 #include "logger.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <memory>
 #include <random>
@@ -23,6 +24,7 @@ void Shuffle(Generator &generator);
 void Shift(Generator &generator);
 
 void Fill(Generator &generator, FillStyle squareBased);
+void ShuffleRowsColumns(Generator &generator);
 
 //================
 // public library functions
@@ -116,8 +118,8 @@ void Fill(Generator &generator, FillStyle fillStyle) {
     switch (fillStyle) {
     case FillStyle::SquareBased:
       g = [sectionSize]() -> int {
-        static int r{0};
-        static int c{0};
+        static int r{};
+        static int c{};
         if (r == 9) {
           r = 0;
         }
@@ -136,7 +138,7 @@ void Fill(Generator &generator, FillStyle fillStyle) {
     case FillStyle::RowBased:
     default:
       g = []() -> int {
-        static int c{0};
+        static int c{};
         if (c == 9) {
           c = 0;
         }
@@ -152,19 +154,18 @@ void Fill(Generator &generator, FillStyle fillStyle) {
 void Shuffle(Generator &generator) {
   std::random_device rd;
   std::mt19937_64 g(rd());
-  for (auto i : std::ranges::iota_view{0, 10}) {
+  for (auto sqrIdx :
+       std::ranges::iota_view{0, static_cast<int>(generator.size)}) {
     // Get the indexes of the value array corresponding to the sudoku square
-    auto idxs{GetAllIndexesOfSquare(generator.size, generator.sectionSize, i)};
+    auto idxs{
+        GetAllIndexesOfSquare(generator.size, generator.sectionSize, sqrIdx)};
     const auto originalIdxs{idxs};
     std::shuffle(idxs.begin(), idxs.end(), g);
     // Swap the actual values according to the shuffles indexes
-    std::for_each(idxs.begin(), idxs.end(),
-                  [originalIdxs, &generator](std::size_t idx) {
-                    auto v1{generator.values[originalIdxs[idx]]};
-                    auto v2{generator.values[idx]};
-                    generator.values[originalIdxs[idx]] = v2;
-                    generator.values[idx] = v1;
-                  });
+    auto itValuesBegin{generator.values.begin()};
+    std::ranges::for_each(idxs, [&itValuesBegin, originalIdxs](auto idx) {
+      std::swap(itValuesBegin[originalIdxs[idx]], itValuesBegin[idx]);
+    });
   }
 }
 
@@ -183,23 +184,98 @@ void Shift(Generator &generator) {
   std::shuffle(generator.values.begin(),
                generator.values.begin() + generator.size, g);
   // shift each row by some amount
-  std::array<std::pair<int, int>, 8> lineShiftOrder{
+  static const std::array<std::pair<int, int>, 8> lineShiftOrder{
       {{1, 3}, {2, 3}, {3, 1}, {4, 3}, {5, 3}, {6, 1}, {7, 3}, {8, 3}}};
 
-  std::for_each(lineShiftOrder.begin(), lineShiftOrder.end(),
-                [&generator](auto lineShift) {
-                  for (auto i : std::ranges::iota_view(
-                           0, static_cast<int>(generator.size))) {
-                    auto shiftTo{i + lineShift.second};
-                    if (shiftTo >= generator.size) {
-                      shiftTo -= generator.size;
-                    }
+  std::ranges::for_each(lineShiftOrder, [&generator](auto lineShift) {
+    for (auto i : std::ranges::iota_view(0, static_cast<int>(generator.size))) {
+      auto shiftTo{i + lineShift.second};
+      // wrap around
+      if (shiftTo >= generator.size) {
+        shiftTo -= generator.size;
+      }
+      auto itPrevRow{generator.values.begin() +
+                     (lineShift.first - 1) * generator.size};
+      auto itBegin{generator.values.begin() + lineShift.first * generator.size};
+      *(itBegin + i) = *(itPrevRow + shiftTo);
+    }
+  });
+  ShelldokuPrinter::PrintSingleLine(generator.values);
+  ShuffleRowsColumns(generator);
+  ShelldokuPrinter::PrintSingleLine(generator.values);
+}
 
-                    auto itPrevRow{generator.values.begin() +
-                                   (lineShift.first - 1) * generator.size};
-                    auto itBegin{generator.values.begin() +
-                                 lineShift.first * generator.size};
-                    *(itBegin + i) = *(itPrevRow + shiftTo);
-                  }
-                });
+void ShuffleRowsColumns(Generator &generator) {
+  std::random_device rd;
+  std::mt19937_64 g{rd()};
+  const auto sudokuSize{generator.size};
+  const int sectionSize{static_cast<int>(generator.sectionSize)};
+  // shuffle the lines, but move rows/columns as 1 unit
+  // Here assume the first 9 values to be row indexes, the last 9 values to be
+  // column indexes.
+
+  // Shufflers containing the index of the row/column,
+  // both row and column indexes are stored in a single container
+  // These are shuffled later
+  std::vector<int> shuffler{};
+  shuffler.resize(sudokuSize * 2);
+  auto shufflerFiller{[sudokuSize]() {
+    static int i{};
+    if (i == sudokuSize) {
+      i = 0;
+    }
+    return i++;
+  }};
+  std::ranges::generate(shuffler, shufflerFiller);
+  auto itRowsBegin{shuffler.begin()};
+  auto itColumnsBegin{shuffler.begin() + sudokuSize};
+  // shuffle in pairs of 3 (don't cross square bariers)
+  for (auto sectionIdx : std::ranges::iota_view{0, sectionSize}) {
+    auto itRowsSectionBegin{itRowsBegin + sectionSize * sectionIdx};
+    auto itColumnsSectionBegin{itColumnsBegin + sectionSize * sectionIdx};
+    // shuffle shufflers
+    std::shuffle(itRowsSectionBegin, itRowsSectionBegin + sectionSize, g);
+    std::shuffle(itColumnsSectionBegin, itColumnsSectionBegin + sectionSize, g);
+
+    // move the rows and columns according to the shufflers
+    for (auto shuffleIdx : std::ranges::iota_view{0, sectionSize}) {
+      auto rcIdx{sectionIdx * sectionSize + shuffleIdx};
+
+      // optimization: don't move what shouldn't move
+      if (itRowsBegin[rcIdx] != rcIdx) {
+        // shuffle rows
+        auto r1It{generator.values.begin() + rcIdx * sudokuSize};
+        auto r2It{generator.values.begin() + itRowsBegin[rcIdx] * sudokuSize};
+        std::ranges::swap_ranges(r1It, r1It + sudokuSize, r2It,
+                                 r2It + sudokuSize);
+      }
+
+      // shuffle columns
+      // optimization: don't move what shouldn't move
+      if (itColumnsBegin[rcIdx] == rcIdx) {
+        continue;
+      }
+      // Because the column values are not next to eachother in the values
+      // container, first get the indexes, copy the values into a new container,
+      // reorder the values according to the shuffler, store them back into the
+      // values container.
+
+      // the indexes of the values in the values container at the current
+      // (incremental) column
+      auto cIndexes{GetAllIndexesOfColumn(sudokuSize, rcIdx)};
+      // the indexes of the values in the values container at the columns we're
+      // swapping with
+      auto shufflerIndexes{
+          GetAllIndexesOfColumn(sudokuSize, itColumnsBegin[rcIdx])};
+
+      for (auto cItIndxs{cIndexes.begin()},
+           itShufflerIndxs{shufflerIndexes.begin()};
+           cItIndxs != cIndexes.end() &&
+           itShufflerIndxs != shufflerIndexes.end();
+           cItIndxs++, itShufflerIndxs++) {
+        std::swap(generator.values[*cItIndxs],
+                  generator.values[*itShufflerIndxs]);
+      }
+    }
+  }
 }
