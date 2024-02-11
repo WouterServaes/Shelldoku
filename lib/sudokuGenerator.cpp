@@ -26,6 +26,8 @@ void Shift(Generator &generator);
 void Fill(Generator &generator, FillStyle squareBased);
 void ShuffleRowsColumns(Generator &generator);
 
+void PokeHoles(Generator &generator, Solver &solver,
+               std::function<bool(const Solver &)> sudokuValidator);
 //================
 // public library functions
 ///================
@@ -94,6 +96,9 @@ bool SudokuGenerator_::Generate(Generator &generator) {
     timeleft = std::chrono::steady_clock::now() - startT;
     generateFunction(generator);
     solver.values = generator.values;
+    PokeHoles(generator, solver,
+              std::bind(&SudokuSolver::ValidateSudoku, pSudokuSolver.get(),
+                        std::placeholders::_1));
     if (pSudokuSolver->ValidateSudoku(solver)) {
       Log::Debug("validated sudoku!");
       return true;
@@ -200,14 +205,14 @@ void Shift(Generator &generator) {
       *(itBegin + i) = *(itPrevRow + shiftTo);
     }
   });
-  ShelldokuPrinter::PrintSingleLine(generator.values);
+  // ShelldokuPrinter::PrintSingleLine(generator.values);
   ShuffleRowsColumns(generator);
-  ShelldokuPrinter::PrintSingleLine(generator.values);
+  // ShelldokuPrinter::PrintSingleLine(generator.values);
 }
 
 void ShuffleRowsColumns(Generator &generator) {
   std::random_device rd;
-  std::mt19937_64 g{rd()};
+  std::mt19937 g{rd()};
   const auto sudokuSize{generator.size};
   const int sectionSize{static_cast<int>(generator.sectionSize)};
   // shuffle the lines, but move rows/columns as 1 unit
@@ -277,5 +282,34 @@ void ShuffleRowsColumns(Generator &generator) {
                   generator.values[*itShufflerIndxs]);
       }
     }
+  }
+}
+
+void PokeHoles(Generator &generator, Solver &solver,
+               std::function<bool(const Solver &)> sudokuValidator) {
+  std::random_device rd;
+  std::default_random_engine e{rd()};
+  static std::uniform_int_distribution<int> uniformDistr(0, generator.size *
+                                                                generator.size);
+  int randomIdx{uniformDistr(e)};
+
+  static int cntHoles{};
+  auto itV{generator.values.begin() + randomIdx};
+  // remove random value
+  if (!itV->has_value()) {
+    PokeHoles(generator, solver, sudokuValidator);
+  }
+  auto v{*itV};
+  itV->reset();
+  // is solvable?
+  solver.values = generator.values;
+  if (sudokuValidator(solver)) {
+    cntHoles++;
+  } else {
+    *itV = v;
+  }
+
+  if (cntHoles < 10) {
+    PokeHoles(generator, solver, sudokuValidator);
   }
 }

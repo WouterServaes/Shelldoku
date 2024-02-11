@@ -70,10 +70,8 @@ Sudoku::Sudoku(std::size_t _size)
 }
 
 Sudoku::Sudoku(std::size_t _size, std::vector<SudokuValue> _values)
-    : size(_size),
-      pSudokuSolver(std::unique_ptr<SudokuSolver>(new SudokuSolver())),
-      pSudokuGenerator(
-          std::unique_ptr<SudokuGenerator>(new SudokuGenerator())) {
+    : size(_size), pSudokuSolver(std::make_unique<SudokuSolver>()),
+      pSudokuGenerator(std::make_unique<SudokuGenerator>()) {
   for (auto v : _values) {
     if (v.value() == 0) {
       v.reset();
