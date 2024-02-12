@@ -1,7 +1,5 @@
 #include "sudoku.h"
 
-#include "logger.h"
-
 #include <algorithm>
 #include <cstddef>
 #include <memory>

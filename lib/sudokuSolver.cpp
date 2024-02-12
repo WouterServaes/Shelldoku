@@ -1,5 +1,4 @@
 #include "sudokuSolver.h"
-#include "logger.h"
 #include "sudokuSolver_.h"
 
 #include "sudokuHelpers.h"

@@ -1,14 +1,7 @@
-#include "input.h"
-#include "ansi.h"
 #include "dispatcher.h"
-#include "events.h"
 
-#include <algorithm>
 #include <cctype>
-#include <cstdio>
 #include <cstring>
-#include <exception>
-#include <ios>
 #include <iostream>
 #include <optional>
 #include <ostream>

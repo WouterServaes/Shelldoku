@@ -1,13 +1,9 @@
-#include "ansi.h"
-#include "logger.h"
 
 #include "eventID.h"
 #include "eventQueue.h"
 #include "events.h"
-#include "input.h"
 #include "listener.h"
 
-#include "shelldokuPrinter.h"
 #include "sudoku.h"
 #include "sudokuHelpers.h"
 #include "sudokuMovement.h"

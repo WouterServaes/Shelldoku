@@ -40,6 +40,14 @@ add_library(SUDOKU_GENERATOR SHARED lib/sudokuGenerator.cpp)
 # link solver to generator, generator needs to solve
 target_link_libraries(SUDOKU_GENERATOR SUDOKU_SOLVER)
 
+target_precompile_headers(SUDOKU_SOLVER PRIVATE 
+common/include/public/logger.h
+)
+target_precompile_headers(SUDOKU_GENERATOR PRIVATE
+common/include/public/logger.h
+common/include/public/shelldokuPrinter.h
+)
+
 set(PUBLIC_INCLUDE_DIRS lib/include/public/ common/include/public/ common/events/include/public/)
 set(PRIVATE_INCLUDE_DIRS lib/include/private/)
 target_include_directories(SUDOKU_SOLVER PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS})
@@ -48,3 +56,11 @@ target_include_directories(SUDOKU_GENERATOR PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVAT
 #============ SUBDIRECTORIES
 add_subdirectory(shelldoku)
 add_subdirectory(shelldoku_generator)
+
+target_precompile_headers(Shelldoku PRIVATE 
+    common/include/public/shelldokuPrinter.h 
+    common/include/public/ansi.h 
+    common/include/public/input.h 
+    common/include/public/logger.h)
+  
+target_precompile_headers(Shelldoku_generator REUSE_FROM Shelldoku)

@@ -1,10 +1,7 @@
 #include "sudokuGenerator.h"
-#include "shelldokuPrinter.h"
 #include "sudokuGenerator_.h"
 #include "sudokuHelpers.h"
 #include "sudokuSolver.h"
-
-#include "logger.h"
 
 #include <algorithm>
 #include <array>
