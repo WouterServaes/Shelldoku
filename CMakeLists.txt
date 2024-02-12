@@ -37,6 +37,8 @@ set(PUBLIC_INCLUDE_DIRS_APPS ../lib/include/public/ ../common/include/public/ ..
 #=========== LIBRARIES
 add_library(SUDOKU_SOLVER SHARED lib/sudokuSolver.cpp)
 add_library(SUDOKU_GENERATOR SHARED lib/sudokuGenerator.cpp)
+add_library(SUDOKU_PARSER SHARED lib/sudokuParser.cpp)
+
 # link solver to generator, generator needs to solve
 target_link_libraries(SUDOKU_GENERATOR SUDOKU_SOLVER)
 

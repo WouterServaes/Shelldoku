@@ -134,3 +134,14 @@ GetAllIndexesOfColumn(const std::size_t size, const std::size_t column) {
 //     }
 //   }
 // }
+
+[[nodiscard]] static constexpr std::string
+ParseToString(const std::vector<SudokuValue> &values, char delim = ',') {
+  std::string str{};
+  for (auto &v : values) {
+    str += v.has_value() ? std::to_string(v.value()) : " ";
+    str += delim;
+  }
+  str.pop_back();
+  return str;
+}
