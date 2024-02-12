@@ -5,7 +5,6 @@
 #include <memory>
 #include <mutex>
 #include <queue>
-#include <string_view>
 #include <vector>
 
 class Event;
@@ -31,7 +30,8 @@ public:
   // Returns true if queue has any listeners
   bool HasListeners();
   // Registers a listener to this queue
-  void RegisterListener(Listener *pListener, const EventID eventId);
+  void RegisterListener(std::shared_ptr<Listener> pListener,
+                        const EventID eventId);
 
 private:
   // Pops event off queue, executes events and notifies listeners
@@ -44,7 +44,7 @@ private:
   std::mutex queueMutex;
   std::mutex waitForEventsMutex;
   std::mutex listenerMutex;
-  std::map<EventID, std::vector<Listener *>> pListeners;
+  std::map<EventID, std::vector<std::shared_ptr<Listener>>> pListeners;
   std::condition_variable queueWaitCond;
   std::condition_variable listenerWaitCond;
 };

@@ -19,8 +19,8 @@ struct Solver {
 
 class SudokuSolver {
 public:
-  SudokuSolver();
-  ~SudokuSolver();
+  SudokuSolver() = default;
+  ~SudokuSolver() = default;
   SudokuSolver(const SudokuSolver &) = delete;
   SudokuSolver(SudokuSolver &&) = delete;
   SudokuSolver &operator=(const SudokuSolver &) = delete;
@@ -29,10 +29,10 @@ public:
   [[nodiscard]] bool CanBeSolved(const Solver &solver);
   [[nodiscard]] bool CanBePlaced(const Solver &solver, ValueLocation location,
                                  SudokuValue value);
-  [[nodiscard]] bool ValidateSudoku(const Solver &solver);
+  [[nodiscard]] bool ValidateSudoku(const Solver &solver) const;
   [[nodiscard]] bool Solve(Solver &solver);
 
 private:
-  void InitiateSolver(const SolverTypes solverType);
-  std::unique_ptr<SudokuSolver_> pSudokuSolver;
+  std::unique_ptr<SudokuSolver_>
+  GetRequiredSolver(const SolverTypes solvertType) const;
 };

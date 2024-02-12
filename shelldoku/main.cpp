@@ -26,11 +26,14 @@ struct ArgOptions {
 };
 
 [[nodiscard]] ArgOptions ParseArgs(int argc, char *argv[]);
-void CreateInputMap(InputHandling::Input *pInput, Sudoku *pSudoku,
-                    SudokuMovement *pPositioner, EventQueue *pEventQueue);
+void CreateInputMap(InputHandling::Input &input, Sudoku &sudoku,
+                    SudokuMovement &positioner,
+                    std::shared_ptr<EventQueue> pEventQueue);
 
-bool IS_RUNNING{true};
-void SetIsRunning(bool *pIsRunning, bool running) { *pIsRunning = running; }
+std::shared_ptr<bool> IS_RUNNING{new bool(true)};
+void SetIsRunning(std::shared_ptr<bool> pIsRunning, bool running) {
+  *pIsRunning = running;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -40,10 +43,10 @@ int main(int argc, char *argv[]) {
   ShelldokuPrinter::PrepareSudokuField(size);
 
   // create queue object
-  EventQueue eventQueue{};
+  std::shared_ptr<EventQueue> pEventQueue{new EventQueue()};
 
   // input is a dispacher object
-  InputHandling::Input input{&eventQueue};
+  InputHandling::Input input{pEventQueue};
   // Listener test{};
   // test.Listen(&eventQueue, EVENT_ID::SUDOKU_PLACE);
 
@@ -66,7 +69,7 @@ int main(int argc, char *argv[]) {
   SudokuMovement positioner{static_cast<unsigned int>(sudoku.SectionSize())};
 
   // create input map
-  CreateInputMap(&input, &sudoku, &positioner, &eventQueue);
+  CreateInputMap(input, sudoku, positioner, pEventQueue);
 
   ShelldokuPrinter::PrintSudoku(sudoku.GetValues(), size);
 
@@ -84,7 +87,7 @@ int main(int argc, char *argv[]) {
 
   while (IS_RUNNING) {
     // Handle the input events, waits for events to continue
-    eventQueue.HandleQueue(true);
+    pEventQueue->HandleQueue(true);
   }
 
   std::cin.get();
@@ -120,57 +123,58 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
   return settings;
 }
 
-void CreateInputMap(InputHandling::Input *pInput, Sudoku *pSudoku,
-                    SudokuMovement *pPositioner, EventQueue *pEventQueue) {
+void CreateInputMap(InputHandling::Input &input, Sudoku &sudoku,
+                    SudokuMovement &positioner,
+                    std::shared_ptr<EventQueue> pEventQueue) {
 
   using intintArg = std::pair<int, int>;
   using intintFunction = FunctionEvent<intintArg>;
   using sudokuFunction = FunctionEvent<int>;
   // clang-format off
-  auto positionerFunction{std::bind(&SudokuMovement::UpdatePosition, pPositioner, std::placeholders::_1)};
-  pInput->AddKey(Ansi::ANSI_UP,     {KEY_UP,    std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE,positionerFunction ,intintArg{0, -1}))});
-  pInput->AddKey(Ansi::ANSI_DOWN,   {KEY_DOWN,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{0,1}))});
-  pInput->AddKey(Ansi::ANSI_RIGHT,  {KEY_RIGHT, std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{1, 0}))});
-  pInput->AddKey(Ansi::ANSI_LEFT,   {KEY_LEFT,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{-1, 0}))});
+  auto positionerFunction{std::bind(&SudokuMovement::UpdatePosition, &positioner, std::placeholders::_1)};
+  input.AddKey(Ansi::ANSI_UP,     {KEY_UP,    std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE,positionerFunction ,intintArg{0, -1}))});
+  input.AddKey(Ansi::ANSI_DOWN,   {KEY_DOWN,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{0,1}))});
+  input.AddKey(Ansi::ANSI_RIGHT,  {KEY_RIGHT, std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{1, 0}))});
+  input.AddKey(Ansi::ANSI_LEFT,   {KEY_LEFT,  std::make_shared<intintFunction>(intintFunction( EVENT_ID::MOVE, positionerFunction,intintArg{-1, 0}))});
 
-  auto quitFunction{std::make_shared<FunctionEvent<bool*, bool>>(FunctionEvent<bool*, bool>(EVENT_ID::STOP, &SetIsRunning, {&IS_RUNNING, false}))};
-  pInput->AddKey(Ansi::ANSI_ESCAPE, {KEY_ESC, quitFunction});
-  pInput->AddKey("Q", {KEY_Q, quitFunction});
+  auto quitFunction{std::make_shared<FunctionEvent<std::shared_ptr<bool>, bool>>(FunctionEvent<std::shared_ptr<bool>, bool>(EVENT_ID::STOP, &SetIsRunning, {IS_RUNNING, false}))};
+  input.AddKey(Ansi::ANSI_ESCAPE, {KEY_ESC, quitFunction});
+  input.AddKey("Q", {KEY_Q, quitFunction});
 
   // use std::bind to create a function ptr to a member function
   // PrintSingle should be called from pPrinterLogic, with a single argument
   //auto sudokuPlace = std::bind(&Sudoku::PlaceValue, pPrinterLogic, std::placeholders::_1);
 
-  auto placeOnPosition{[pSudoku, pPositioner, pEventQueue](unsigned int value){
-    if(pSudoku->PlaceValue(pPositioner->GetPosition(), value)) {
+  auto placeOnPosition{[&sudoku, &positioner, pEventQueue](unsigned int value){
+    if(sudoku.PlaceValue(positioner.GetPosition(), value)) {
       Dispatcher dis(pEventQueue);
       ShelldokuPrinter::PrintSingle(std::to_string(value));
       dis.DispatchEvent(EVENT_ID::PRINT);
     }
   }};
 
-  pInput->AddKey("1", {KEY_1, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 1))});
-  pInput->AddKey("2", {KEY_2, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 2))});
-  pInput->AddKey("3", {KEY_3, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 3))});
-  pInput->AddKey("4", {KEY_4, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 4))});
-  pInput->AddKey("5", {KEY_5, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 5))});
-  pInput->AddKey("6", {KEY_6, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 6))});
-  pInput->AddKey("7", {KEY_7, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 7))});
-  pInput->AddKey("8", {KEY_8, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 8))});
-  pInput->AddKey("9", {KEY_9, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 9))});
-  pInput->AddKey("0", {KEY_0, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 0))});
+  input.AddKey("1", {KEY_1, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 1))});
+  input.AddKey("2", {KEY_2, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 2))});
+  input.AddKey("3", {KEY_3, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 3))});
+  input.AddKey("4", {KEY_4, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 4))});
+  input.AddKey("5", {KEY_5, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 5))});
+  input.AddKey("6", {KEY_6, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 6))});
+  input.AddKey("7", {KEY_7, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 7))});
+  input.AddKey("8", {KEY_8, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 8))});
+  input.AddKey("9", {KEY_9, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 9))});
+  input.AddKey("0", {KEY_0, std::make_shared<sudokuFunction>(sudokuFunction(EVENT_ID::SUDOKU_PLACE, placeOnPosition, 0))});
   
-  auto ready{[pSudoku, pEventQueue](){
+  auto ready{[&sudoku, pEventQueue](){
     Dispatcher dis(pEventQueue);
-    if(pSudoku->IsSolved()) {
+    if(sudoku.IsSolved()) {
       dis.DispatchEvent(EVENT_ID::SUDOKU_SOLVED);
-      pSudoku->Stop();
+      sudoku.Stop();
     } else {
       dis.DispatchEvent(EVENT_ID::SUDOKU_FAIL);
     }
   }};
 
-  pInput->AddKey("R", {KEY_R, std::make_shared<FunctionEvent<>>(FunctionEvent<>(EVENT_ID::READY, ready))});
+  input.AddKey("R", {KEY_R, std::make_shared<FunctionEvent<>>(FunctionEvent<>(EVENT_ID::READY, ready))});
 
   // clang-format on
 

@@ -3,22 +3,18 @@
 
 #include "sudokuHelpers.h"
 #include <memory>
+#include <stdexcept>
 
 //================
 // public library functions
 ///================
-
-SudokuSolver::SudokuSolver() : pSudokuSolver(nullptr) {}
-
-SudokuSolver::~SudokuSolver() {}
 
 bool SudokuSolver::CanBeSolved(const Solver &solver) {
   if (solver.values.empty()) {
     Log::Debug("Empty sudoku can't be solved...");
     return false;
   }
-  InitiateSolver(solver.solvertType);
-  return pSudokuSolver->CanBeSolved(solver);
+  return GetRequiredSolver(solver.solvertType)->CanBeSolved(solver);
 }
 
 bool SudokuSolver::CanBePlaced(const Solver &solver, ValueLocation location,
@@ -27,32 +23,30 @@ bool SudokuSolver::CanBePlaced(const Solver &solver, ValueLocation location,
     Log::Debug("Can't place on an empty grid...");
     return false;
   }
-  InitiateSolver(solver.solvertType);
-  return pSudokuSolver->CanBePlaced(solver, location, value);
+
+  return GetRequiredSolver(solver.solvertType)
+      ->CanBePlaced(solver, location, value);
 }
 
-bool SudokuSolver::ValidateSudoku(const Solver &solver) {
+bool SudokuSolver::ValidateSudoku(const Solver &solver) const {
   if (solver.values.empty()) {
     Log::Debug("Solver can't validate empty sudoku...");
     return false;
   }
-  InitiateSolver(solver.solvertType);
-  return pSudokuSolver->ValidateSudoku(solver);
+  return GetRequiredSolver(solver.solvertType)->ValidateSudoku(solver);
 }
 
-void SudokuSolver::InitiateSolver(const SolverTypes solverType) {
-  if (pSudokuSolver != nullptr && pSudokuSolver->solverType == solverType) {
-    return;
-  }
-
+std::unique_ptr<SudokuSolver_>
+SudokuSolver::GetRequiredSolver(const SolverTypes solverType) const {
   switch (solverType) {
   case SolverTypes::Bitstring:
-    pSudokuSolver = std::make_unique<SudokuSolver_bitmasks>();
-    break;
+    return std::make_unique<SudokuSolver_bitmasks>();
   default:
   case SolverTypes::None:
     break;
   }
+
+  throw std::runtime_error("unsupported solver type");
 }
 
 bool SudokuSolver::Solve(Solver &solver) {
@@ -60,8 +54,7 @@ bool SudokuSolver::Solve(Solver &solver) {
     Log::Debug("Solver solved empty sudoku...");
     return true;
   }
-  InitiateSolver(solver.solvertType);
-  return pSudokuSolver->Solve(solver);
+  return GetRequiredSolver(solver.solvertType)->Solve(solver);
 }
 
 //================

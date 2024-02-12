@@ -7,7 +7,7 @@ class Event;
 
 class Dispatcher {
 public:
-  Dispatcher(EventQueue *pEventQueue);
+  Dispatcher(std::shared_ptr<EventQueue> pEventQueue);
   ~Dispatcher() = default;
   Dispatcher() = delete;
   Dispatcher(const Dispatcher &) = delete;
@@ -20,5 +20,5 @@ public:
   void DispatchEvent(EventID id);
 
 private:
-  EventQueue *const pEventQueue;
+  std::shared_ptr<EventQueue> pEventQueue;
 };

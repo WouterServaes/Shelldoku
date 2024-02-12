@@ -15,7 +15,8 @@ using namespace InputHandling;
 
 std::string GetLastError() { return std::string(std::strerror(errno)); }
 
-Input::Input(EventQueue *pEventQueue, const KeyMapping &keymapping)
+Input::Input(std::shared_ptr<EventQueue> pEventQueue,
+             const KeyMapping &keymapping)
     : Dispatcher(pEventQueue), term(), keyMapping(keymapping) {}
 
 Input::~Input() {

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <memory>
 #include <vector>
 
 // https://norvig.com/sudoku.html
@@ -37,10 +36,8 @@
 // row + col] = value;
 
 Sudoku::Sudoku(std::size_t _size)
-    : size(_size),
-      pSudokuSolver(std::unique_ptr<SudokuSolver>(new SudokuSolver())),
-      pSudokuGenerator(
-          std::unique_ptr<SudokuGenerator>(new SudokuGenerator())) {
+    : size(_size), sudokuSolver(SudokuSolver()),
+      sudokuGenerator(SudokuGenerator()) {
 
   //   for(unsigned int r{}; r < size; r++) {
   //   for(unsigned int c{}; c < size; c++) {
@@ -68,8 +65,8 @@ Sudoku::Sudoku(std::size_t _size)
 }
 
 Sudoku::Sudoku(std::size_t _size, std::vector<SudokuValue> _values)
-    : size(_size), pSudokuSolver(std::make_unique<SudokuSolver>()),
-      pSudokuGenerator(std::make_unique<SudokuGenerator>()) {
+    : size(_size), sudokuSolver(SudokuSolver()),
+      sudokuGenerator(SudokuGenerator()) {
   for (auto v : _values) {
     if (v.value() == 0) {
       v.reset();
@@ -82,7 +79,7 @@ Sudoku::~Sudoku() {}
 
 void Sudoku::GenerateSudoku(Generator &generator) {
   generator.values = GetValues();
-  if (!pSudokuGenerator->Generate(generator)) {
+  if (!sudokuGenerator.Generate(generator)) {
     Log::Debug("Unable to generate");
   }
   SetValues(generator.values);
@@ -124,8 +121,8 @@ bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) {
 bool Sudoku::IsSolvable() noexcept {
   Solver solver{size, SectionSize(), SolverTypes::Bitstring};
   solver.values = GetValues();
-  return pSudokuSolver->ValidateSudoku(solver) &&
-         pSudokuSolver->CanBeSolved(solver);
+  return sudokuSolver.ValidateSudoku(solver) &&
+         sudokuSolver.CanBeSolved(solver);
 }
 
 bool Sudoku::CanPlaceValue(const std::vector<LockableValue> &toPlaceOn,
@@ -152,14 +149,14 @@ bool Sudoku::IsSolved(
                       [](LockableValue lv) {
                         return !lv.second.has_value();
                       }) == toCheck.end() &&
-         pSudokuSolver->ValidateSudoku(solver);
+         sudokuSolver.ValidateSudoku(solver);
 }
 
 void Sudoku::Solve() {
   Solver solver{size, SectionSize(), SolverTypes::Bitstring};
   solver.values = GetValues();
   Log::Debug("trying to solve...");
-  if (pSudokuSolver->Solve(solver)) {
+  if (sudokuSolver.Solve(solver)) {
     SetValues(solver.values);
     Log::Debug("solved");
   } else {

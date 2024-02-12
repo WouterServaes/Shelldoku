@@ -1,11 +1,6 @@
 
 #pragma once
-
-#include "events.h"
 #include <memory>
-#include <mutex>
-#include <string_view>
-#include <vector>
 
 class EventQueue;
 class Event;
@@ -21,11 +16,11 @@ public:
 
   // Registers listener to an event queue with the event id it is listening for
   // A listener can listen to multiple queues with different id
-  void Listen(EventQueue *pEventQueue, const EventID eventId);
+  void Listen(std::shared_ptr<EventQueue> pEventQueue, const EventID eventId);
 
   // Listener receives event id
   virtual void Notify(EventID eventId);
 
 private:
-  EventQueue *pEventQueue;
+  std::shared_ptr<EventQueue> pEventQueue;
 };

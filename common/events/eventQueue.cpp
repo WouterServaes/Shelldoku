@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
-#include <stdexcept>
 #include <vector>
 
 void EventQueue::PushEvent(std::shared_ptr<Event> pEvent) {
@@ -30,10 +29,11 @@ void EventQueue::HandleQueue(bool stallThread) {
   PopEvent();
 }
 
-void EventQueue::RegisterListener(Listener *pListener, const EventID eventId) {
+void EventQueue::RegisterListener(std::shared_ptr<Listener> pListener,
+                                  const EventID eventId) {
   std::unique_lock<std::mutex> lock{listenerMutex};
   if (pListeners.find(eventId) == pListeners.end()) {
-    pListeners[eventId] = std::vector<Listener *>({pListener});
+    pListeners[eventId] = std::vector<std::shared_ptr<Listener>>({pListener});
   } else {
     pListeners[eventId].push_back(pListener);
   }
@@ -54,8 +54,9 @@ void EventQueue::NotifyListeners(std::shared_ptr<Event> pEvent) {
   const auto id = pEvent->Id();
   if (pListeners.find(id) != pListeners.end()) {
     // Notify all listeners of this event ID with the event
-    std::for_each(pListeners[id].begin(), pListeners[id].end(),
-                  [id](Listener *pListener) { pListener->Notify(id); });
+    std::for_each(
+        pListeners[id].begin(), pListeners[id].end(),
+        [id](std::shared_ptr<Listener> pListener) { pListener->Notify(id); });
   }
 }
 

@@ -1,14 +1,10 @@
 #include "listener.h"
 #include "eventQueue.h"
-#include "events.h"
-#include "logger.h"
-#include <algorithm>
-#include <iostream>
 #include <memory>
-#include <mutex>
 
-void Listener::Listen(EventQueue *pEventQueue, const EventID eventId) {
-  pEventQueue->RegisterListener(this, eventId);
+void Listener::Listen(std::shared_ptr<EventQueue> pEventQueue,
+                      const EventID eventId) {
+  pEventQueue->RegisterListener(std::shared_ptr<Listener>(this), eventId);
 }
 
 void Listener::Notify(EventID eventId) {

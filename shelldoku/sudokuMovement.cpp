@@ -1,11 +1,5 @@
 #include "sudokuMovement.h"
 
-#include "ansi.h"
-#include "logger.h"
-
-#include <math.h>
-#include <string>
-
 SudokuMovement::SudokuMovement(unsigned int sectionSize)
     : cursorPosition({0, 0}), sectionSize(sectionSize) {}
 

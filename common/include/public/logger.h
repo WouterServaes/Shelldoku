@@ -3,7 +3,6 @@
 #include <systemd/sd-journal.h>
 
 #include <string>
-#include <string_view>
 
 // loggign to systemd journal to avoid clutter in sudoku
 // see logs in journalctl -f | grep Shelldoku

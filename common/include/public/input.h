@@ -2,11 +2,8 @@
 #pragma once
 
 #include "dispatcher.h"
-#include <any>
 #include <atomic>
 #include <cstdint>
-#include <functional>
-#include <iterator>
 #include <linux/input-event-codes.h>
 #include <map>
 #include <memory>
@@ -14,7 +11,6 @@
 #include <string_view>
 #include <termios.h>
 #include <thread>
-#include <utility>
 
 class EventQueue;
 
@@ -30,7 +26,8 @@ static const KeyMapping KEYS{};
 
 class Input final : public Dispatcher {
 public:
-  Input(EventQueue *pEventQueue, const KeyMapping &keymapping = KEYS);
+  Input(std::shared_ptr<EventQueue> pEventQueue,
+        const KeyMapping &keymapping = KEYS);
   ~Input();
 
   // Initializes the input listener

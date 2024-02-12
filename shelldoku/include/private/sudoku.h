@@ -5,7 +5,6 @@
 #include "sudokuSolver.h"
 
 #include <cstddef>
-#include <memory>
 #include <vector>
 
 namespace EVENT_ID {
@@ -60,6 +59,6 @@ private:
   const std::size_t size;
   std::vector<LockableValue> values;
 
-  std::unique_ptr<SudokuGenerator> pSudokuGenerator;
-  std::unique_ptr<SudokuSolver> pSudokuSolver;
+  SudokuGenerator sudokuGenerator;
+  SudokuSolver sudokuSolver;
 };
