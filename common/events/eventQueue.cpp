@@ -2,6 +2,7 @@
 #include "events.h"
 #include "listener.h"
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -29,19 +30,19 @@ void EventQueue::HandleQueue(bool stallThread) {
   PopEvent();
 }
 
-void EventQueue::RegisterListener(std::shared_ptr<Listener> pListener,
+void EventQueue::RegisterListener(std::reference_wrapper<Listener> listener,
                                   const EventID eventId) {
   std::unique_lock<std::mutex> lock{listenerMutex};
-  if (pListeners.find(eventId) == pListeners.end()) {
-    pListeners[eventId] = std::vector<std::shared_ptr<Listener>>({pListener});
+  if (listeners.find(eventId) == listeners.end()) {
+    listeners[eventId] =
+        std::vector<std::reference_wrapper<Listener>>({listener});
   } else {
-    pListeners[eventId].push_back(pListener);
+    listeners[eventId].push_back(listener);
   }
 }
 
 void EventQueue::PopEvent() {
   std::unique_lock<std::mutex> lock(queueMutex);
-
   if (!pEvents.empty()) {
     pEvents.front()->DoEvent();
     NotifyListeners(pEvents.front());
@@ -52,17 +53,18 @@ void EventQueue::PopEvent() {
 void EventQueue::NotifyListeners(std::shared_ptr<Event> pEvent) {
   std::unique_lock<std::mutex> lock{listenerMutex};
   const auto id = pEvent->Id();
-  if (pListeners.find(id) != pListeners.end()) {
+  if (listeners.find(id) != listeners.end()) {
     // Notify all listeners of this event ID with the event
-    std::for_each(
-        pListeners[id].begin(), pListeners[id].end(),
-        [id](std::shared_ptr<Listener> pListener) { pListener->Notify(id); });
+    std::for_each(listeners[id].begin(), listeners[id].end(),
+                  [id](std::reference_wrapper<Listener> listener) {
+                    listener.get().Notify(id);
+                  });
   }
 }
 
 bool EventQueue::HasListeners() {
   std::unique_lock<std::mutex> lock{listenerMutex};
-  return !pListeners.empty();
+  return !listeners.empty();
 }
 
 bool EventQueue::HasEvents() {

@@ -5,7 +5,7 @@
 class EventQueue;
 class Event;
 
-class Listener {
+class Listener : public std::enable_shared_from_this<Listener> {
 public:
   Listener() = default;
   ~Listener() = default;

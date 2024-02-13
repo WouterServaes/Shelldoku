@@ -84,8 +84,7 @@ int main(int argc, char *argv[]) {
   }
   sudoku.Start();
   ShelldokuPrinter::PrintSudoku(sudoku.GetValues(), size);
-
-  while (IS_RUNNING) {
+  while (*IS_RUNNING) {
     // Handle the input events, waits for events to continue
     pEventQueue->HandleQueue(true);
   }

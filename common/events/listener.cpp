@@ -4,7 +4,7 @@
 
 void Listener::Listen(std::shared_ptr<EventQueue> pEventQueue,
                       const EventID eventId) {
-  pEventQueue->RegisterListener(std::shared_ptr<Listener>(this), eventId);
+  pEventQueue->RegisterListener(std::ref(*this), eventId);
 }
 
 void Listener::Notify(EventID eventId) {

@@ -1,6 +1,7 @@
 #pragma once
 #include "eventID.h"
 #include <condition_variable>
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -30,7 +31,7 @@ public:
   // Returns true if queue has any listeners
   bool HasListeners();
   // Registers a listener to this queue
-  void RegisterListener(std::shared_ptr<Listener> pListener,
+  void RegisterListener(std::reference_wrapper<Listener> listener,
                         const EventID eventId);
 
 private:
@@ -44,7 +45,7 @@ private:
   std::mutex queueMutex;
   std::mutex waitForEventsMutex;
   std::mutex listenerMutex;
-  std::map<EventID, std::vector<std::shared_ptr<Listener>>> pListeners;
+  std::map<EventID, std::vector<std::reference_wrapper<Listener>>> listeners;
   std::condition_variable queueWaitCond;
   std::condition_variable listenerWaitCond;
 };
