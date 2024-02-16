@@ -31,11 +31,11 @@ int main(int argc, char *argv[]) {
     msg += std::string(" - after ") +
            std::to_string(sudokuGenerator.TotalTries()) + " tries";
     std::cout << msg << std::endl;
-    // ShelldokuPrinter::PrintSingleLine(generator.values);
-    // Ansi::SaveCursorPos();
-    // ShelldokuPrinter::FillCout(generator.size);
-    // Ansi::BackToSaved();
-    // ShelldokuPrinter::PrintSudoku(generator.values, generator.size);
+    ShelldokuPrinter::PrintSingleLine(generator.values);
+    Ansi::SaveCursorPos();
+    ShelldokuPrinter::FillCout(generator.size);
+    Ansi::BackToSaved();
+    ShelldokuPrinter::PrintSudoku(generator.values, generator.size);
   }};
 
   std::vector<std::thread> threads;

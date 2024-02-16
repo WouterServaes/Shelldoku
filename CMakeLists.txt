@@ -23,8 +23,6 @@ find_package_handle_standard_args(Systemd DEFAULT_MSG SYSTEMD_INCLUDE_DIRS SYSTE
 
 mark_as_advanced(SYSTEMD_INCLUDE_DIRS SYSTEMD_LIBRARIES)
 
-
-
 #=========== COMPILE COMMANDS
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,28 +30,11 @@ set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #=========== FILE GLOBS AND VARIABLES
 file(GLOB COMMON common/*.cpp common/events/*.cpp)
-set(PUBLIC_INCLUDE_DIRS_APPS ../lib/include/public/ ../common/include/public/ ../common/events/include/public/)
-
-#=========== LIBRARIES
-add_library(SUDOKU_SOLVER SHARED lib/sudokuSolver.cpp)
-add_library(SUDOKU_GENERATOR SHARED lib/sudokuGenerator.cpp)
-# link solver to generator, generator needs to solve
-target_link_libraries(SUDOKU_GENERATOR SUDOKU_SOLVER)
-
-target_precompile_headers(SUDOKU_SOLVER PRIVATE 
-common/include/public/logger.h
-)
-target_precompile_headers(SUDOKU_GENERATOR PRIVATE
-common/include/public/logger.h
-common/include/public/shelldokuPrinter.h
-)
-
-set(PUBLIC_INCLUDE_DIRS lib/include/public/ common/include/public/ common/events/include/public/)
-set(PRIVATE_INCLUDE_DIRS lib/include/private/)
-target_include_directories(SUDOKU_SOLVER PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS})
-target_include_directories(SUDOKU_GENERATOR PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
+set(PUBLIC_INCLUDE_DIRS_APPS ${CMAKE_SOURCE_DIR}/lib/sudokuTools/include/public/ ${CMAKE_SOURCE_DIR}/common/include/public/ ${CMAKE_SOURCE_DIR}/common/events/include/public/)
 
 #============ SUBDIRECTORIES
+add_subdirectory(lib/sudokuTools)
+add_subdirectory(lib/ansiUIFramework)
 add_subdirectory(shelldoku)
 add_subdirectory(shelldoku_generator)
 
