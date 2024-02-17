@@ -39,16 +39,16 @@ class AnsiUIFramework {
 public:
   [[nodiscard]] static std::shared_ptr<AnsiUIFramework> instance() {
     if (framework == nullptr) {
-      Ansi::SaveCursorPos();
       framework = std::shared_ptr<AnsiUIFramework>(new AnsiUIFramework());
+      framework->PrepareAnsiUiFramework();
     }
     return framework;
   }
   ~AnsiUIFramework();
-
   void Box(std::string_view boxName, UIData::ITEM boxItem);
   void EndBox();
-  // void Item()
+  void Item(std::string_view item);
+
 private:
   // tree
   struct UIItem {
@@ -59,10 +59,12 @@ private:
     UIItem *parentItem;
     std::vector<UIItem *> childItems;
   };
+  void PrepareAnsiUiFramework();
   void UpdateCurrentItem(const std::string_view &boxName,
                          const UIData::ITEM &boxItem);
   void TravelCursor(UIItem *const targetItem);
-  void RecursiveTraveler(UIItem *const targetItem, UIItem *nextItem);
+  void RecursiveTraveler(UIItem *const targetItem, UIItem *nextItem,
+                         UIData::POSITION &targetPosition);
   void RemoveItemTree(UIItem *item);
   void RemoveItemChildren(std::vector<UIItem *> &childItems);
   void MoveCursor(const std::pair<int, int> &xy);
@@ -72,6 +74,7 @@ private:
   UIItem *pCurrentItem;
   //
   bool inBox{false};
+  bool prepared{false};
 };
 
 [[nodiscard]] static std::shared_ptr<AnsiUIFramework> ANSI_UI() {

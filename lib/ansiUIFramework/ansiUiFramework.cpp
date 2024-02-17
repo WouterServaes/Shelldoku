@@ -6,6 +6,7 @@
 #include <math.h>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
@@ -36,6 +37,19 @@ AnsiUIFramework::~AnsiUIFramework() {
   }
 }
 
+void AnsiUIFramework::PrepareAnsiUiFramework() {
+  int rows{5};
+  int columns{200};
+  for (auto r : std::ranges::iota_view{0, rows}) {
+    for (auto i : std::ranges::iota_view{0, columns / 10}) {
+      std::cout << "          ";
+    }
+    std::cout << std::endl;
+  }
+  Ansi::MoveUp(rows);
+  Ansi::MoveLeft(columns);
+}
+
 void AnsiUIFramework::UpdateCurrentItem(const std::string_view &boxName,
                                         const UIData::ITEM &boxItem) {
 
@@ -63,8 +77,10 @@ void AnsiUIFramework::TravelCursor(UIItem *const targetItem) {
   if (pCurrentItem == nullptr || targetItem == nullptr) {
     return;
   }
-
-  RecursiveTraveler(targetItem, pCurrentItem);
+  Ansi::BackToSaved();
+  UIData::POSITION targetPosition{};
+  RecursiveTraveler(targetItem, pCurrentItem, targetPosition);
+  MoveCursor(targetPosition);
 }
 
 void AnsiUIFramework::MoveCursor(const std::pair<int, int> &xy) {
@@ -87,6 +103,7 @@ void AnsiUIFramework::Box(std::string_view boxName, UIData::ITEM boxItem) {
   }
 
   UpdateCurrentItem(boxName, boxItem);
+  TravelCursor(pCurrentItem);
 }
 
 void AnsiUIFramework::EndBox() {
@@ -101,23 +118,31 @@ void AnsiUIFramework::EndBox() {
   }
 }
 
+void AnsiUIFramework::Item(std::string_view item) { std::cout << item; }
+
 ///==================
 // Tree function
 ///========
 
 // Searches the tree for target
 void AnsiUIFramework::RecursiveTraveler(UIItem *const targetItem,
-                                        UIItem *nextItem) {
+                                        UIItem *nextItem,
+                                        UIData::POSITION &targetPosition) {
   // found
   if (targetItem == nextItem) {
     const auto item{uiData.GetItem(targetItem->nameHash)};
-    MoveCursor(item->first);
+    targetPosition.first += item->first.first;
+    targetPosition.second += item->first.second;
     return;
   }
 
   // children
   if (!nextItem->childItems.empty()) {
+
     nextItem = nextItem->childItems[0];
+    const auto item{uiData.GetItem(nextItem->nameHash)};
+    targetPosition.first += item->first.first;
+    targetPosition.second += item->first.second;
     return;
   }
 
@@ -128,7 +153,11 @@ void AnsiUIFramework::RecursiveTraveler(UIItem *const targetItem,
         std::ranges::find(nextItem->parentItem->childItems, nextItem);
     // check if sibling exists
     if ((thisItem++) != nextItem->parentItem->childItems.end()) {
+
       nextItem = *thisItem;
+      const auto item{uiData.GetItem(nextItem->nameHash)};
+      targetPosition.first += item->first.first;
+      targetPosition.second += item->first.second;
       return;
     }
 
@@ -140,6 +169,10 @@ void AnsiUIFramework::RecursiveTraveler(UIItem *const targetItem,
       if ((parentItem++) !=
           nextItem->parentItem->parentItem->childItems.end()) {
         nextItem = *parentItem;
+        const auto item{uiData.GetItem(nextItem->nameHash)};
+        targetPosition.first += item->first.first;
+        targetPosition.second += item->first.second;
+
         return;
       }
     }
