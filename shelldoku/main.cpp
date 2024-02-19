@@ -6,6 +6,7 @@
 
 #include "sudoku.h"
 #include "sudokuHelpers.h"
+#include "sudokuMessager.h"
 #include "sudokuMovement.h"
 
 #include "sudokuGenerator.h"
@@ -41,9 +42,14 @@ int main(int argc, char *argv[]) {
   const unsigned int size{options.size};
 
   ShelldokuPrinter::PrepareSudokuField(size);
-
+  SudokuMessageField::PrepareMessageField({size + 5, 0});
   // create queue object
   std::shared_ptr<EventQueue> pEventQueue{new EventQueue()};
+
+  SudokuMessager sudokuMessager{};
+  sudokuMessager.Listen(pEventQueue, EVENT_ID::SUDOKU_SOLVED);
+  sudokuMessager.Listen(pEventQueue, EVENT_ID::SUDOKU_FAIL);
+  sudokuMessager.Listen(pEventQueue, EVENT_ID::SUDOKU_PLACE);
 
   // input is a dispacher object
   InputHandling::Input input{pEventQueue};

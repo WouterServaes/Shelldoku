@@ -14,7 +14,7 @@ project(AnsiUiFramework_test
 LANGUAGES CXX)
 
 add_executable(AnsiUiFramework_test main.cpp)
-target_link_libraries(AnsiUiFramework_test ANSI_UI_FRAMEWORK)
+target_link_libraries(AnsiUiFramework_test ANSI_UI_FRAMEWORK ${SYSTEMD_LIBRARIES})
 target_include_directories(AnsiUiFramework_test PUBLIC include/public/)
 
 

@@ -1,11 +1,13 @@
 #pragma once
 #include "ansi.h"
 #include <assert.h>
+#include <compare>
 #include <functional>
 #include <map>
 #include <memory>
 #include <optional>
 #include <string_view>
+#include <utility>
 
 // static framework
 // clang-format off
@@ -23,16 +25,32 @@
 // AnsiUi::EndBox
 
 // clang-format on
-struct UIData {
-  using POSITION = std::pair<unsigned int, unsigned int>;
-  using SIZE = std::pair<unsigned int, unsigned int>;
-  using ITEM = std::pair<POSITION, SIZE>;
-  bool AddItem(std::string_view itemName, ITEM itemData);
-  [[nodiscard]] std::optional<ITEM> GetItem(std::string_view itemName) const;
-  [[nodiscard]] std::optional<ITEM> GetItem(unsigned int itemNameHash) const;
+using POSITION = std::pair<unsigned int, unsigned int>;
+using SIZE = std::pair<unsigned int, unsigned int>;
+using ITEM = std::pair<POSITION, SIZE>;
+
+struct ItemInfo {
+  ItemInfo(POSITION item) : position(item){};
+  ItemInfo() = default;
+  std::pair<unsigned int, unsigned int> position;
+  std::optional<std::pair<unsigned int, unsigned int>> GetWorldPos() const;
+  void CacheWorldPos(std::pair<unsigned int, unsigned int> pos);
 
 private:
-  std::unordered_map<unsigned int, ITEM> uiItems;
+  std::optional<std::pair<unsigned int, unsigned int>> worldPos;
+};
+
+struct UIData {
+  bool AddItem(std::string_view itemName, POSITION itemData);
+  [[nodiscard]] std::optional<ItemInfo>
+  GetItem(std::string_view itemName) const;
+  [[nodiscard]] std::optional<ItemInfo>
+  GetItem(unsigned int itemNameHash) const;
+
+  [[nodiscard]] ItemInfo &GetItemRef(unsigned int itemNameHash);
+
+private:
+  std::unordered_map<unsigned int, ItemInfo> uiItems;
 };
 
 class AnsiUIFramework {
@@ -45,7 +63,7 @@ public:
     return framework;
   }
   ~AnsiUIFramework();
-  void Box(std::string_view boxName, UIData::ITEM boxItem);
+  void Box(std::string_view boxName, POSITION boxItem);
   void EndBox();
   void Item(std::string_view item);
 
@@ -61,10 +79,10 @@ private:
   };
   void PrepareAnsiUiFramework();
   void UpdateCurrentItem(const std::string_view &boxName,
-                         const UIData::ITEM &boxItem);
-  void TravelCursor(UIItem *const targetItem);
+                         const POSITION &boxItem);
+  void TravelCursor(UIItem *const fromItem, UIItem *const targetItem);
   void RecursiveTraveler(UIItem *const targetItem, UIItem *nextItem,
-                         UIData::POSITION &targetPosition);
+                         POSITION &targetPosition);
   void RemoveItemTree(UIItem *item);
   void RemoveItemChildren(std::vector<UIItem *> &childItems);
   void MoveCursor(const std::pair<int, int> &xy);

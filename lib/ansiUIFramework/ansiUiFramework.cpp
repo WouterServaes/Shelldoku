@@ -1,5 +1,6 @@
 #include "ansiUiFramework.h"
 #include "ansi.h"
+#include "logger.h"
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -8,37 +9,53 @@
 #include <optional>
 #include <ranges>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <vector>
 
 std::shared_ptr<AnsiUIFramework> AnsiUIFramework::framework = nullptr;
 
-bool UIData::AddItem(std::string_view itemName, UIData::ITEM itemData) {
+bool UIData::AddItem(std::string_view itemName, POSITION itemData) {
   auto hash = std::hash<std::string_view>{}(itemName);
   if (uiItems.contains(hash))
     return false;
-  uiItems[hash] = itemData;
+  uiItems[hash] = ItemInfo(itemData);
   return true;
 }
 
-std::optional<UIData::ITEM> UIData::GetItem(std::string_view itemName) const {
+std::optional<ItemInfo> UIData::GetItem(std::string_view itemName) const {
   return GetItem(std::hash<std::string_view>{}(itemName));
 }
 
-std::optional<UIData::ITEM> UIData::GetItem(unsigned int itemNameHash) const {
+std::optional<ItemInfo> UIData::GetItem(unsigned int itemNameHash) const {
   if (uiItems.contains(itemNameHash))
     return {uiItems.at(itemNameHash)};
   return {};
+}
+ItemInfo &UIData::GetItemRef(unsigned int itemNameHash) {
+  if (uiItems.contains(itemNameHash))
+    return uiItems.at(itemNameHash);
+  throw std::runtime_error("hash not found");
+}
+
+std::optional<std::pair<unsigned int, unsigned int>>
+ItemInfo::GetWorldPos() const {
+  return worldPos;
+}
+void ItemInfo::CacheWorldPos(std::pair<unsigned int, unsigned int> pos) {
+  this->worldPos = pos;
 }
 
 AnsiUIFramework::~AnsiUIFramework() {
   if (pCurrentItem) {
     RemoveItemTree(pCurrentItem);
   }
+  Ansi::BackToSaved();
 }
 
 void AnsiUIFramework::PrepareAnsiUiFramework() {
-  int rows{5};
+  Ansi::SaveCursorPos();
+  int rows{20};
   int columns{200};
   for (auto r : std::ranges::iota_view{0, rows}) {
     for (auto i : std::ranges::iota_view{0, columns / 10}) {
@@ -51,7 +68,7 @@ void AnsiUIFramework::PrepareAnsiUiFramework() {
 }
 
 void AnsiUIFramework::UpdateCurrentItem(const std::string_view &boxName,
-                                        const UIData::ITEM &boxItem) {
+                                        const POSITION &boxItem) {
 
   if (uiData.GetItem(boxName).has_value()) {
     // search through the fucking tree and find the item pointing to the box
@@ -73,14 +90,36 @@ void AnsiUIFramework::UpdateCurrentItem(const std::string_view &boxName,
   inBox = true;
 }
 
-void AnsiUIFramework::TravelCursor(UIItem *const targetItem) {
-  if (pCurrentItem == nullptr || targetItem == nullptr) {
+void AnsiUIFramework::TravelCursor(UIItem *const fromItem,
+                                   UIItem *const targetItem) {
+  if (fromItem == nullptr && targetItem == nullptr) {
     return;
   }
+
+  if (targetItem == nullptr) {
+    return;
+  }
+
   Ansi::BackToSaved();
-  UIData::POSITION targetPosition{};
-  RecursiveTraveler(targetItem, pCurrentItem, targetPosition);
+
+  POSITION targetPosition{};
+
+  auto &targetPositionInfo{uiData.GetItemRef(targetItem->nameHash)};
+  if (fromItem) {
+    auto fromItemInfo{uiData.GetItem(fromItem->nameHash)};
+    if (fromItem == targetItem->parentItem &&
+        fromItemInfo->GetWorldPos().has_value()) {
+      targetPosition = fromItemInfo->GetWorldPos().value();
+      targetPosition.first += targetPositionInfo.position.first;
+      targetPosition.second += targetPositionInfo.position.second;
+    }
+  } else {
+    RecursiveTraveler(targetItem, fromItem, targetPosition);
+    targetPositionInfo.CacheWorldPos(targetPosition);
+  }
+
   MoveCursor(targetPosition);
+  std::cout << targetPosition.first << "," << targetPosition.second;
 }
 
 void AnsiUIFramework::MoveCursor(const std::pair<int, int> &xy) {
@@ -97,20 +136,24 @@ void AnsiUIFramework::MoveCursor(const std::pair<int, int> &xy) {
   }
 }
 
-void AnsiUIFramework::Box(std::string_view boxName, UIData::ITEM boxItem) {
+void AnsiUIFramework::Box(std::string_view boxName, POSITION boxItem) {
   if (!inBox && pCurrentItem) {
     throw std::runtime_error("all boxes should be inside a single top box");
   }
 
+  UIItem *fromItem = pCurrentItem;
+  Log::Debug("Box:");
+  // this sets the current item to a newly created item
   UpdateCurrentItem(boxName, boxItem);
-  TravelCursor(pCurrentItem);
+  // this moves to the current item, according to the current item
+  TravelCursor(fromItem, pCurrentItem);
 }
 
 void AnsiUIFramework::EndBox() {
   if (!inBox) {
     throw std::runtime_error("Ending box while not in it");
   }
-
+  Log::Debug("EndBox");
   if (pCurrentItem->parentItem) {
     pCurrentItem = pCurrentItem->parentItem;
   } else {
@@ -127,59 +170,55 @@ void AnsiUIFramework::Item(std::string_view item) { std::cout << item; }
 // Searches the tree for target
 void AnsiUIFramework::RecursiveTraveler(UIItem *const targetItem,
                                         UIItem *nextItem,
-                                        UIData::POSITION &targetPosition) {
-  // found
-  if (targetItem == nextItem) {
+                                        POSITION &targetPosition) {
+  // found if target is next or next is null
+  if (targetItem == nextItem || nextItem == nullptr) {
     const auto item{uiData.GetItem(targetItem->nameHash)};
-    targetPosition.first += item->first.first;
-    targetPosition.second += item->first.second;
+    targetPosition.first += item->position.first;
+    targetPosition.second += item->position.second;
+    Log::Debug(std::string("Target found") +
+               std::to_string(targetPosition.first) + "," +
+               std::to_string(targetPosition.second));
+    nextItem = nullptr;
     return;
   }
 
-  // children
+  // adds the position and width to the target position
+  static auto addBoxPosition{
+      [&targetPosition](const UIData &uiData, UIItem *const nextItem) {
+        const auto item{uiData.GetItem(nextItem->nameHash)};
+        targetPosition.first += item->position.first;
+        targetPosition.second += item->position.second;
+      }};
+
+  addBoxPosition(uiData, nextItem);
+
+  // if it has a kid, target this next
   if (!nextItem->childItems.empty()) {
-
     nextItem = nextItem->childItems[0];
-    const auto item{uiData.GetItem(nextItem->nameHash)};
-    targetPosition.first += item->first.first;
-    targetPosition.second += item->first.second;
-    return;
-  }
-
-  if (nextItem->parentItem != nullptr) {
+  } else if (nextItem->parentItem != nullptr) {
     // siblings
     // iterator to current item to find its sibling
     auto thisItem =
         std::ranges::find(nextItem->parentItem->childItems, nextItem);
     // check if sibling exists
     if ((thisItem++) != nextItem->parentItem->childItems.end()) {
-
       nextItem = *thisItem;
-      const auto item{uiData.GetItem(nextItem->nameHash)};
-      targetPosition.first += item->first.first;
-      targetPosition.second += item->first.second;
-      return;
-    }
-
-    // no child or sibling
-    if (nextItem->parentItem->parentItem != nullptr) {
+    } else if (nextItem->parentItem->parentItem != nullptr) {
       auto parentItem = std::ranges::find(
           nextItem->parentItem->parentItem->childItems, nextItem->parentItem);
       // check if sibling of parent exists
       if ((parentItem++) !=
           nextItem->parentItem->parentItem->childItems.end()) {
         nextItem = *parentItem;
-        const auto item{uiData.GetItem(nextItem->nameHash)};
-        targetPosition.first += item->first.first;
-        targetPosition.second += item->first.second;
-
-        return;
       }
     }
+  } else {
+    throw std::runtime_error("no more items to evaluate..?");
   }
 
-  // tree end: no result
-  throw std::runtime_error("target item was not found ui items");
+  Log::Debug("not found, adding position");
+  RecursiveTraveler(targetItem, nextItem, targetPosition);
 }
 
 // removes all children of given container of items
