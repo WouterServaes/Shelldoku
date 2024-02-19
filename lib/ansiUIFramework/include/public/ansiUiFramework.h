@@ -1,5 +1,6 @@
 #pragma once
 #include "ansi.h"
+#include "tree.h"
 #include <assert.h>
 #include <compare>
 #include <functional>
@@ -8,7 +9,6 @@
 #include <optional>
 #include <string_view>
 #include <utility>
-
 // static framework
 // clang-format off
 // V1

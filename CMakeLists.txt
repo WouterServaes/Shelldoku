@@ -30,7 +30,11 @@ set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #=========== FILE GLOBS AND VARIABLES
 file(GLOB COMMON common/*.cpp common/events/*.cpp)
-set(PUBLIC_INCLUDE_DIRS_APPS ${CMAKE_SOURCE_DIR}/lib/sudokuTools/include/public/ ${CMAKE_SOURCE_DIR}/common/include/public/ ${CMAKE_SOURCE_DIR}/common/events/include/public/)
+set(PUBLIC_INCLUDE_DIRS_APPS 
+${CMAKE_SOURCE_DIR}/lib/sudokuTools/include/public/ 
+${CMAKE_SOURCE_DIR}/common/include/public/ 
+${CMAKE_SOURCE_DIR}/common/events/include/public/
+${CMAKE_SOURCE_DIR}/common/tree/include/public)
 
 #============ SUBDIRECTORIES
 add_subdirectory(lib/sudokuTools)

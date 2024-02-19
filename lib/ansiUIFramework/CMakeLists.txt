@@ -1,7 +1,9 @@
 add_library(ANSI_UI_FRAMEWORK SHARED ansiUiFramework.cpp)
 
 target_include_directories(ANSI_UI_FRAMEWORK 
-  PUBLIC include/public/ ${CMAKE_SOURCE_DIR}/common/include/public/ 
+  PUBLIC include/public/ 
+  ${CMAKE_SOURCE_DIR}/common/include/public/ 
+  ${CMAKE_SOURCE_DIR}/common/tree/include/public/
   PRIVATE include/private/)
 
 target_precompile_headers(ANSI_UI_FRAMEWORK PRIVATE
