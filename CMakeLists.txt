@@ -54,6 +54,7 @@ set(PUBLIC_INCLUDE_DIRS lib/include/public/ common/include/public/ common/events
 set(PRIVATE_INCLUDE_DIRS lib/include/private/)
 target_include_directories(SUDOKU_SOLVER PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS})
 target_include_directories(SUDOKU_GENERATOR PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
+target_include_directories(SUDOKU_PARSER PUBLIC ${PUBLIC_INCLUDE_DIRS} PRIVATE ${PRIVATE_INCLUDE_DIRS}) 
 
 #============ SUBDIRECTORIES
 add_subdirectory(shelldoku)

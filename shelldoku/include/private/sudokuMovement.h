@@ -14,6 +14,6 @@ public:
   [[nodiscard]] const std::pair<int, int> GetPosition() const noexcept;
 
 private:
-  std::pair<int, int> cursorPosition;
+  std::pair<unsigned int, unsigned int> cursorPosition;
   const int sectionSize;
 };

@@ -4,6 +4,7 @@
 #include "events.h"
 #include "listener.h"
 
+#include "logger.h"
 #include "sudoku.h"
 #include "sudokuHelpers.h"
 #include "sudokuMovement.h"
@@ -146,6 +147,7 @@ void CreateInputMap(InputHandling::Input &input, Sudoku &sudoku,
   //auto sudokuPlace = std::bind(&Sudoku::PlaceValue, pPrinterLogic, std::placeholders::_1);
 
   auto placeOnPosition{[&sudoku, &positioner, pEventQueue](unsigned int value){
+    Log::Debug(std::string("pos: " + std::to_string(positioner.GetPosition().first) + std::string(" ") + std::to_string(positioner.GetPosition().second)));
     if(sudoku.PlaceValue(positioner.GetPosition(), value)) {
       Dispatcher dis(pEventQueue);
       ShelldokuPrinter::PrintSingle(std::to_string(value));
