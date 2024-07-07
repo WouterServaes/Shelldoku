@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <optional>
 #include <ranges>
+#include <string>
 #include <vector>
 
 enum class SolverTypes { None = 0, Bitstring = 1 };
@@ -136,12 +137,28 @@ GetAllIndexesOfColumn(const std::size_t size, const std::size_t column) {
 // }
 
 [[nodiscard]] static constexpr std::string
-ParseToString(const std::vector<SudokuValue> &values, char delim = ',') {
+ParseToString(const std::vector<SudokuValue> &values, char delim = ',',
+              char emptyChar = 'x') {
   std::string str{};
   for (auto &v : values) {
-    str += v.has_value() ? std::to_string(v.value()) : " ";
+    str +=
+        v.has_value() ? std::to_string(v.value()) : std::string(1, emptyChar);
     str += delim;
   }
   str.pop_back();
   return str;
+}
+
+static constexpr void ParseFromString(std::vector<SudokuValue> &values,
+                                      const std::string &string,
+                                      char delim = ',', char emptyChar = 'x') {
+  for (const auto c : string) {
+    if (c == delim) {
+      continue;
+    } else if (c == emptyChar) {
+      values.emplace_back(SudokuValue{});
+    } else if (std::isdigit(c)) {
+      values.emplace_back(SudokuValue{std::stoi(std::string(1, c))});
+    }
+  }
 }

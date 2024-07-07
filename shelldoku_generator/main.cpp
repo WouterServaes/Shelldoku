@@ -1,16 +1,20 @@
 #include "sudokuGenerator.h"
 #include "sudokuHelpers.h"
+#include "sudokuParser.h"
 #include <chrono>
 #include <getopt.h>
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <thread>
+#include <vector>
 
 struct ArgOptions {
   unsigned int size{9};
   unsigned int threads{1};
   std::chrono::seconds maxRunTime{5};
+  unsigned int count{1};
 };
 
 [[nodiscard]] ArgOptions ParseArgs(int argc, char *argv[]);
@@ -18,10 +22,14 @@ struct ArgOptions {
 int main(int argc, char *argv[]) {
   const auto options{ParseArgs(argc, argv)};
 
-  auto generation{[options]() {
-    SudokuGenerator sudokuGenerator{};
-    Generator generator{options.size, options.size / 3, options.maxRunTime,
-                        GeneratorTypes::Shift};
+  // thread lambda
+  // auto generation{[options]() {
+  SudokuGenerator sudokuGenerator{};
+  Generator generator{options.size, options.size / 3, options.maxRunTime,
+                      GeneratorTypes::Shift};
+  unsigned int sudokuCount = options.count;
+  std::string fileLoc = "generated.txt";
+  for (; sudokuCount; sudokuCount--) {
     std::string msg{"generation "};
     if (sudokuGenerator.Generate(generator)) {
       msg += "complete";
@@ -31,22 +39,27 @@ int main(int argc, char *argv[]) {
     msg += std::string(" - after ") +
            std::to_string(sudokuGenerator.TotalTries()) + " tries";
     std::cout << msg << std::endl;
-    // ShelldokuPrinter::PrintSingleLine(generator.values);
-    // Ansi::SaveCursorPos();
-    // ShelldokuPrinter::FillCout(generator.size);
-    // Ansi::BackToSaved();
-    // ShelldokuPrinter::PrintSudoku(generator.values, generator.size);
-  }};
 
-  std::vector<std::thread> threads;
-  threads.resize(options.threads);
-  for (auto &thr : threads) {
-    thr = std::thread(generation);
+    sudokuParser::ParseToFile(generator.values, fileLoc);
+    sudokuGenerator.Reset();
   }
 
-  for (auto &thr : threads) {
-    thr.join();
-  }
+  // ShelldokuPrinter::PrintSingleLine(generator.values);
+  // Ansi::SaveCursorPos();
+  // ShelldokuPrinter::FillCout(generator.size);
+  // Ansi::BackToSaved();
+  // ShelldokuPrinter::PrintSudoku(generator.values, generator.size);
+  //}};
+
+  // std::vector<std::thread> threads;
+  // threads.resize(options.threads);
+  // for (auto &thr : threads) {
+  //   thr = std::thread(generation);
+  // }
+  //
+  // for (auto &thr : threads) {
+  //  thr.join();
+  //}
   std::cin.get();
 }
 
@@ -57,9 +70,10 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
       {"help", no_argument, 0, 0},
       {"size", required_argument, 0, 9},
       {"threads", required_argument, 0, 1},
-      {"maxRunTime", required_argument, 0, 100}};
+      {"maxRunTime", required_argument, 0, 100},
+      {"count", required_argument, 0, 1}};
   int option_index{};
-  while ((opt = getopt_long(argc, argv, "hs:j:t:", long_options,
+  while ((opt = getopt_long(argc, argv, "hs:j:t:c:", long_options,
                             &option_index)) != -1) {
     switch (opt) {
     case 'h':
@@ -73,6 +87,9 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
       break;
     case 't':
       options.maxRunTime = std::chrono::seconds(std::stoi(optarg));
+      break;
+    case 'c':
+      options.count = std::stoi(optarg);
       break;
     }
   }
