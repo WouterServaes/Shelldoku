@@ -33,6 +33,7 @@ public:
 
   [[nodiscard]] bool Generate(Generator &generator);
   [[nodiscard]] unsigned int TotalTries() const;
+  void Reset();
 
 private:
   void InitiateGenerator(Generator &generator);

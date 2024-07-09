@@ -43,6 +43,8 @@ unsigned int SudokuGenerator::TotalTries() const {
   return pSudokuGenerator->TotalTries();
 }
 
+void SudokuGenerator::Reset() { pSudokuGenerator->Reset(); }
+
 void SudokuGenerator::InitiateGenerator(Generator &generator) {
   FillStyle fillStyle{};
   switch (generator.generatorType) {
@@ -80,6 +82,8 @@ void SudokuGenerator_::SetGenerateFunction(
     std::function<void(Generator &)> generateFunction_) {
   generateFunction = generateFunction_;
 }
+
+void SudokuGenerator_::Reset() { totalTries = 0; }
 
 bool SudokuGenerator_::Generate(Generator &generator) {
   Solver solver(generator.size, generator.sectionSize, SolverTypes::Bitstring);

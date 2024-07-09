@@ -21,6 +21,12 @@ void SudokuMovement::UpdatePosition(std::pair<int, int> direction) {
   cursorPosition.first += direction.first;
   cursorPosition.second += direction.second;
 
+  // :)
+  if (cursorPosition.first == static_cast<unsigned int>(-1))
+    cursorPosition.first = 0;
+  if (cursorPosition.second == static_cast<unsigned int>(-1))
+    cursorPosition.second = 0;
+
   int posX = direction.first;
   int posY = direction.second;
 

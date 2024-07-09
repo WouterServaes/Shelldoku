@@ -20,6 +20,7 @@ public:
   [[nodiscard]] bool Generate(Generator &generator);
   [[nodiscard]] unsigned int TotalTries() const;
   void SetGenerateFunction(std::function<void(Generator &)> generateFunction);
+  void Reset();
 
 private:
   std::function<void(Generator &)> generateFunction;
