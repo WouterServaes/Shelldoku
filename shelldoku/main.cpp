@@ -8,6 +8,7 @@
 #include "sudoku.h"
 #include "sudokuHelpers.h"
 #include "sudokuMovement.h"
+#include "sudokuParser.h"
 
 #include "sudokuGenerator.h"
 #include "sudokuSolver.h"
@@ -23,7 +24,8 @@
 
 struct ArgOptions {
   unsigned int size{9};
-  bool generate{false};
+  bool generate{true};
+  std::string file;
 };
 
 [[nodiscard]] ArgOptions ParseArgs(int argc, char *argv[]);
@@ -59,12 +61,17 @@ int main(int argc, char *argv[]) {
   // 0, 0, 0, 0, 0, 0, 0, 8, 7, 0, 0, 0, 0, 3, 1, 0, 0, 3, 0, 1, 0, 0, 8, 0, 9,
   // 0, 0, 8, 6, 3, 0, 0, 5, 0, 5, 0, 0, 9, 0, 6, 0, 0, 1, 3, 0, 0, 0, 0, 2, 5,
   // 0, 0, 0, 0, 0, 0, 0, 0, 7, 4, 0, 0, 5, 2, 0, 6, 3, 0, 0}};
-  Sudoku sudoku{Sudoku(size)};
+  Sudoku sudoku;
   Solver solver{size, size / 3, SolverTypes::Bitstring};
   if (options.generate) {
+    sudoku = Sudoku(size);
     Generator settings{size, sudoku.SectionSize(), std::chrono::seconds(60),
                        GeneratorTypes::Shift};
     sudoku.GenerateSudoku(settings);
+  } else {
+    std::vector<SudokuValue> pregeneratedValues{};
+    sudokuParser::ParseFromFile(pregeneratedValues, options.file);
+    sudoku = Sudoku(size, pregeneratedValues);
   }
 
   SudokuMovement positioner{static_cast<unsigned int>(sudoku.SectionSize())};
@@ -102,10 +109,10 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
   ArgOptions settings{};
   static struct option long_options[] = {{"help", no_argument, 0, 0},
                                          {"size", required_argument, 0, 9},
-                                         {"generate", no_argument, 0, false}};
+                                         {"file", no_argument, 0, false}};
   int option_index{};
-  while ((opt = getopt_long(argc, argv, "hs:g", long_options, &option_index)) !=
-         -1) {
+  while ((opt = getopt_long(argc, argv, "hs:f:", long_options,
+                            &option_index)) != -1) {
     switch (opt) {
     case 'h':
       std::cout << "HELP" << std::endl;
@@ -115,8 +122,9 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
       settings.size = std::stoi(optarg);
 
       break;
-    case 'g':
-      settings.generate = true;
+    case 'f':
+      settings.generate = false;
+      settings.file = optarg;
     }
   }
 

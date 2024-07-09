@@ -68,7 +68,7 @@ Sudoku::Sudoku(std::size_t _size, std::vector<SudokuValue> _values)
     : size(_size), sudokuSolver(SudokuSolver()),
       sudokuGenerator(SudokuGenerator()) {
   for (auto v : _values) {
-    if (v.value() == 0) {
+    if (v.has_value() && v.value() == 0) {
       v.reset();
     }
     values.emplace_back(LockableValue{v.has_value(), v});

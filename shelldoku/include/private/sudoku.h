@@ -15,9 +15,14 @@ static const unsigned int SUDOKU_FAIL = 7;
 
 class Sudoku final {
 public:
-  Sudoku() = delete;
+  Sudoku() = default;
   Sudoku(std::size_t size);
   Sudoku(std::size_t size, std::vector<SudokuValue> values);
+  Sudoku &operator=(const Sudoku &sudoku) {
+    this->values = sudoku.values;
+    this->size = sudoku.size;
+    return *this;
+  }
   ~Sudoku();
   // Generates sudoku
   void GenerateSudoku(Generator &generator);
@@ -56,7 +61,7 @@ private:
   [[nodiscard]] bool
   IsSolved(const std::vector<LockableValue> &toCheck) const noexcept;
 
-  const std::size_t size;
+  std::size_t size;
   std::vector<LockableValue> values;
 
   SudokuGenerator sudokuGenerator;
