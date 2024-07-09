@@ -92,7 +92,8 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
       options.size = std::stoi(optarg);
       break;
     case 'j':
-      options.threads = std::stoi(optarg);
+      // options.threads = std::stoi(optarg);
+      std::cout << "Mutlithreaded does not work\n";
       break;
     case 't':
       options.maxRunTime = std::chrono::seconds(std::stoi(optarg));
