@@ -1,3 +1,4 @@
+#include "sudokuDifficulty.h"
 #include "sudokuGenerator.h"
 #include "sudokuHelpers.h"
 #include "sudokuParser.h"
@@ -51,10 +52,13 @@ int main(int argc, char *argv[]) {
              std::to_string(sudokuGenerator.TotalTries()) + " tries";
       std::cout << msg << std::endl;
 
-      sudokuParser::ParseToFile(generator.values, fileLoc);
+      const auto difficulty = sudokuDifficulty::CalculateDifficulty(
+          generator.values, generator.size, generator.sectionSize);
+      sudokuParser::ParseToFile(generator.values, difficulty, fileLoc);
       sudokuGenerator.Reset();
     }
   }};
+
   // threads
   std::vector<std::thread> threads;
   threads.resize(options.threads);

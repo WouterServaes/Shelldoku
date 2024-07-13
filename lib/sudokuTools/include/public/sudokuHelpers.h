@@ -111,6 +111,19 @@ GetAllIndexesOfColumn(const std::size_t size, const std::size_t column) {
 
   return r;
 }
+
+[[nodiscard]] static const std::vector<std::size_t>
+GetAllIndexesOfRow(const std::size_t size, const std::size_t row) {
+  std::vector<std::size_t> r{};
+  r.resize(size);
+  std::size_t i{};
+  std::ranges::generate(r, [size, row, &i]() {
+    return XYToSudokuPos(size, {i++, row});
+  });
+
+  return r;
+}
+
 // static void ValidatePositionConverterFunctions() {
 //   for(unsigned int r{}; r < size; r++) {
 //     for(unsigned int c{}; c < size; c++) {

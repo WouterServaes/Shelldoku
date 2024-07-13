@@ -1,7 +1,7 @@
 project(Shelldoku
 LANGUAGES CXX)
 
-set(SHELLDOKU sudoku.cpp sudokuMovement.cpp sudokuMessager.cpp)
+set(SHELLDOKU sudoku.cpp sudokuMovement.cpp sudokuMessager.cpp ${CMAKE_SOURCE_DIR}/lib/sudokuTools/sudokuDifficulty.cpp)
 set(SOURCE main.cpp ${COMMON} ${SHELLDOKU} ) 
 
 add_executable(${PROJECT_NAME} ${SOURCE})

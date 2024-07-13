@@ -1,5 +1,5 @@
 add_library(SUDOKU_SOLVER SHARED sudokuSolver.cpp)
-add_library(SUDOKU_GENERATOR SHARED sudokuGenerator.cpp)
+add_library(SUDOKU_GENERATOR SHARED sudokuGenerator.cpp sudokuDifficulty.cpp)
 add_library(SUDOKU_PARSER SHARED sudokuParser.cpp)
 # link solver to generator, generator needs to solve
 target_link_libraries(SUDOKU_GENERATOR SUDOKU_SOLVER)
