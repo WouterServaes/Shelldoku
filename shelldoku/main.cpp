@@ -157,7 +157,7 @@ void CreateInputMap(InputHandling::Input &input, Sudoku &sudoku,
     Log::Debug(std::string("pos: " + std::to_string(positioner.GetPosition().first) + std::string(" ") + std::to_string(positioner.GetPosition().second)));
     if(sudoku.PlaceValue(positioner.GetPosition(), value)) {
       Dispatcher dis(pEventQueue);
-      ShelldokuPrinter::PrintSingle(std::to_string(value));
+      ShelldokuPrinter::PrintSingle(value ? std::to_string(value) : " ");
       dis.DispatchEvent(EVENT_ID::PRINT);
     }
   }};

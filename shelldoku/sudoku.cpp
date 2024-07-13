@@ -1,4 +1,5 @@
 #include "sudoku.h"
+#include "sudokuHelpers.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -111,6 +112,10 @@ void Sudoku::SetValues(const std::vector<SudokuValue> _values) {
 
 bool Sudoku::PlaceValue(ValueLocation location, SudokuValue value) {
   if (CanPlaceValue(values, location, value)) {
+    // clear the sudoku value instead if given value is 0
+    if (value.value() == 0) {
+      value = SudokuValue();
+    }
     values.at(XYToSudokuPos(size, location)).second = value;
     return true;
   }
