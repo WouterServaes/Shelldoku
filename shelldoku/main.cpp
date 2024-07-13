@@ -48,19 +48,8 @@ int main(int argc, char *argv[]) {
   // create queue object
   std::shared_ptr<EventQueue> pEventQueue{new EventQueue()};
 
-  // input is a dispacher object
   InputHandling::Input input{pEventQueue};
-  // Listener test{};
-  // test.Listen(&eventQueue, EVENT_ID::SUDOKU_PLACE);
 
-  // Sudoku sudoku(size,
-  // {4,{},{},{},{},{},8,{},5,{},3,{},{},{},{},{},{},{},{},{},{},7,{},{},{},{},{},{},2,{},{},{},{},{},6,{},{},{},{},{},8,{},4,{},{},{},{},{},{},1,{},{},{},{},{},{},{},6,{},3,{},7,{},5,{},{},2,{},{},{},{},{},1,{},4,{},{},{},{},{},{}});
-
-  // Sudoku sudoku{size, std::unique_ptr<SudokuSolver_bitmasks>(new
-  // SudokuSolver_bitmasks(size, size/3)),{ 3, 0, 6, 5, 0, 8, 4, 0, 0, 5, 2, 0,
-  // 0, 0, 0, 0, 0, 0, 0, 8, 7, 0, 0, 0, 0, 3, 1, 0, 0, 3, 0, 1, 0, 0, 8, 0, 9,
-  // 0, 0, 8, 6, 3, 0, 0, 5, 0, 5, 0, 0, 9, 0, 6, 0, 0, 1, 3, 0, 0, 0, 0, 2, 5,
-  // 0, 0, 0, 0, 0, 0, 0, 0, 7, 4, 0, 0, 5, 2, 0, 6, 3, 0, 0}};
   Sudoku sudoku;
   Solver solver{size, size / 3, SolverTypes::Bitstring};
   if (options.generate) {
@@ -149,10 +138,6 @@ void CreateInputMap(InputHandling::Input &input, Sudoku &sudoku,
   input.AddKey(Ansi::ANSI_ESCAPE, {KEY_ESC, quitFunction});
   input.AddKey("Q", {KEY_Q, quitFunction});
 
-  // use std::bind to create a function ptr to a member function
-  // PrintSingle should be called from pPrinterLogic, with a single argument
-  //auto sudokuPlace = std::bind(&Sudoku::PlaceValue, pPrinterLogic, std::placeholders::_1);
-
   auto placeOnPosition{[&sudoku, &positioner, pEventQueue](unsigned int value){
     Log::Debug(std::string("pos: " + std::to_string(positioner.GetPosition().first) + std::string(" ") + std::to_string(positioner.GetPosition().second)));
     if(sudoku.PlaceValue(positioner.GetPosition(), value)) {
@@ -185,60 +170,4 @@ void CreateInputMap(InputHandling::Input &input, Sudoku &sudoku,
 
   input.AddKey("R", {KEY_R, std::make_shared<FunctionEvent<>>(FunctionEvent<>(EVENT_ID::READY, ready))});
 
-  // clang-format on
-
-  // a Key should be able to have multiple events assigned;
-  // When a key is executed, all it's keys should be added to an event queue
-  // All events in the queue are executed on the main thread.
-  // Only the input and adding the events to the queue is done on a seperate
-  // thread.
-
-  // When a value key is pressed, the value is send to Sudoku::PlaceValue,
-  // it is evaluated (can it be placed?), and placed in the values container.
-  // If it is placed, a redraw event event is added to the shelldokuPrinter
-  // event handler.
-
-  // Now, input handling, game logic, and graphics are all done in seperate
-  // threads
 }
-
-// 4 nov 2023:
-// Multiple ways of event handling:
-//
-// 1. attach the function to be called to the event itself (current
-// implementation),
-//    let the eventQueue execute these in PopEvent(). The
-//    EventQueue::HandleQueue() calls the PopEvent(), This handle function runs
-//    on the main thread, directly called in the main run loop in main().
-
-// 2. The events are just strings ("eventId"). The event Queue HandleQueue() is
-// called in main() loop,
-//    This handler function notifies the listeners of this event.
-//    The listener object should then call the actual function for the event.
-//
-//
-// 3. Both: events hold ids and functionality. If functionality exists for the
-// event,
-//    The event handler executes it. Event always holds an id, listeners can
-//    still listen for event. This makes it so simple event functions are easily
-//    implemented (see CreateInputMap), and gives other objects still the
-//    possibility to react to events as listener. Event functions are always
-//    executed before the event notification
-
-// Position and placing
-//
-// Input object handles input, fires events on key inputs
-//
-// Ansi.h holds the move and place functions
-//
-// Sudoku.h holds the sudoku values
-//
-// To place a sudoku value, the cursor position should be translated to sudoku
-// array position Eg screen pos to world pos...
-//
-//  -> The 0,0 position is the saved ANSI position.
-//  -> ANSI could request the cursor position.
-//      The Sudoku pos would be the saved cursor position - current position
-
-//  -> also possible to just ++ or -- the position var whenever a move function
-//  is called...
