@@ -144,6 +144,10 @@ void CreateInputMap(InputHandling::Input &input, Sudoku &sudoku,
       Dispatcher dis(pEventQueue);
       ShelldokuPrinter::PrintSingle(value ? std::to_string(value) : " ");
       dis.DispatchEvent(EVENT_ID::PRINT);
+      if(sudoku.IsSolved()) {
+        dis.DispatchEvent(EVENT_ID::SUDOKU_SOLVED);
+        sudoku.Stop();
+      }
     }
   }};
 
