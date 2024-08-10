@@ -19,6 +19,7 @@ static const std::string FILE_NAME = "sudoku";
 static const std::string FILE_EXTENSION = ".txt";
 static const std::string FILES_TMP_DIR =
     std::filesystem::temp_directory_path().string() + "/" + FILE_LOCATION;
+static const std::string FILES_MAIN_DIR = "/etc/" + FILE_LOCATION;
 
 struct ArgOptions {
   unsigned int size{9};
@@ -131,8 +132,8 @@ std::string getTempFileLoc(std::thread::id threadId) {
 
 void tempFilesToMainFile() {
   static const std::string MAIN_FILE_STR =
-      FILE_LOCATION + FILE_NAME + FILE_EXTENSION;
-  std::filesystem::create_directory(FILE_LOCATION);
+      FILES_MAIN_DIR + FILE_NAME + FILE_EXTENSION;
+  std::filesystem::create_directory(FILES_MAIN_DIR);
   std::ofstream mainFile;
   mainFile.open(MAIN_FILE_STR, std::ios_base::app);
 
