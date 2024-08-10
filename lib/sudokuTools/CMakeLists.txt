@@ -18,3 +18,8 @@ ${CMAKE_SOURCE_DIR}/common/include/public/logger.h
 ${CMAKE_SOURCE_DIR}/common/include/public/shelldokuPrinter.h
 )
 
+install(
+  TARGETS SUDOKU_SOLVER SUDOKU_GENERATOR SUDOKU_PARSER 
+  LIBRARY DESTINATION ${SHELLDOKU_LIB_DEST}
+)
+

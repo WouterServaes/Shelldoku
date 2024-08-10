@@ -8,7 +8,8 @@ target_precompile_headers(ANSI_UI_FRAMEWORK PRIVATE
 ${CMAKE_SOURCE_DIR}/common/include/public/ansi.h
 )
 
-
+install(TARGETS ANSI_UI_FRAMEWORK 
+LIBRARY DESTINATION ${SHELLDOKU_LIB_DEST})
 
 project(AnsiUiFramework_test
 LANGUAGES CXX)

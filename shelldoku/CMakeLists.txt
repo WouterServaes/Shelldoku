@@ -11,3 +11,8 @@ target_link_libraries(${PROJECT_NAME} ${SYSTEMD_LIBRARIES} SUDOKU_SOLVER SUDOKU_
 target_include_directories(${PROJECT_NAME} 
 PUBLIC ${PUBLIC_INCLUDE_DIRS_APPS} ${CMAKE_SOURCE_DIR}/lib/ansiUIFramework/include/public/
 PRIVATE include/private/ include/public/)
+
+install(
+  TARGETS Shelldoku 
+  RUNTIME DESTINATION ${SHELLDOKU_BIN_DEST}
+)

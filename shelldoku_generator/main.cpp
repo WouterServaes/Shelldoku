@@ -77,6 +77,14 @@ int main(int argc, char *argv[]) {
 }
 
 ArgOptions ParseArgs(int argc, char *argv[]) {
+  const std::string HELP_MESSAGE{
+      "Shelldoku_generator, generating and rating sudokus\n\n"
+      "-h:\tprint this\n"
+      "-c:\tthe amount of sudokus to generate (default: 1)\n"
+      "-t:\tthe amount of time (seconds) to let the application run (default: "
+      "5 seconds)\n\n"
+      "generated sudokus file in sudoku.txt"};
+
   int opt{};
   ArgOptions options{};
   static struct option long_options[] = {
@@ -90,14 +98,16 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
                             &option_index)) != -1) {
     switch (opt) {
     case 'h':
-      std::cout << "help" << std::endl;
+      std::cout << HELP_MESSAGE << std::endl;
+      exit(0);
       break;
     case 's':
-      options.size = std::stoi(optarg);
+      // currently not used, all sudokus are 9x9
+      // options.size = std::stoi(optarg);
       break;
     case 'j':
       // options.threads = std::stoi(optarg);
-      std::cout << "Mutlithreaded does not work\n";
+      // std::cout << "Mutlithreaded does not work\n";
       break;
     case 't':
       options.maxRunTime = std::chrono::seconds(std::stoi(optarg));
@@ -137,4 +147,5 @@ void tempFilesToMainFile() {
   }
   // clean up tmp files
   std::filesystem::remove_all(FILES_TMP_DIR);
+  std::cout << "generated in " << MAIN_FILE_STR << "\n";
 }

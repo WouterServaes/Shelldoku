@@ -39,7 +39,6 @@ void SetIsRunning(std::shared_ptr<bool> pIsRunning, bool running) {
 }
 
 int main(int argc, char *argv[]) {
-
   const auto options{ParseArgs(argc, argv)};
   const unsigned int size{options.size};
 
@@ -94,6 +93,26 @@ int main(int argc, char *argv[]) {
 }
 
 ArgOptions ParseArgs(int argc, char *argv[]) {
+  const std::string HELP_MESSAGE{
+      "Shelldoku, sudoku in the shell\n\n"
+      "Usage:\n"
+      "Move with arrow keys.\n"
+      "Place numbers on empty place, numbers can be replaced. (1-9)\n"
+      "0 resets a square\n"
+      "Game will automatically stop when sudoku is filled in correctly\n"
+      "Press R if you're done filling everything in\n"
+      "Quit with esc or Q\n"
+      "-------------\n"
+      "-h:\t\tprint this\n"
+      "-f <file>:\tuse file with pre generated sudokus, generates a random one "
+      "if no file is given\n\n"
+      "-------------\n"
+      "Shelldoku_generator\n"
+      "Generation tool that stores generated sudoku info in a file.\n"
+      "These generated sudokus have a difficulty rating.\n"
+      "The file can be used in Shelldoku application.\n"
+      "See more w/ ./Shelldoku_generator -h"};
+
   int opt{};
   ArgOptions settings{};
   static struct option long_options[] = {{"help", no_argument, 0, 0},
@@ -104,12 +123,12 @@ ArgOptions ParseArgs(int argc, char *argv[]) {
                             &option_index)) != -1) {
     switch (opt) {
     case 'h':
-      std::cout << "HELP" << std::endl;
+      std::cout << HELP_MESSAGE << std::endl;
+      exit(0);
       break;
     case 's':
-      std::cout << " -S <> NOT USED" << std::endl;
-      settings.size = std::stoi(optarg);
-
+      std::cout << " Currently unsupported, all sudokus are 9x9" << std::endl;
+      // settings.size = std::stoi(optarg);
       break;
     case 'f':
       settings.generate = false;
