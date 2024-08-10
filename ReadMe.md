@@ -1,10 +1,13 @@
 
 # Shelldoku
-sudoku in terminal
+sudoku in terminal. 
+All formatting and movement in ASCII
 
+![Alt text](images/Shelldoku.png "a title")
 # Shelldoku generator
 sudoku generator
 
+![Alt text](images/Shelldoku_generator.png "a title")
 # Build and install
 ```
 git clone https://github.com/WouterServaes/Shelldoku.git
@@ -29,6 +32,14 @@ layout: difficulty_rating-x,x2,...,x3
 ## Sudoku Solver
 Solving sudoku in different ways.
 Current options: bitstring
+
+# To-do
+- Use other sudokus from file instead of first one
+- Add a timer
+- Add info about bad sudoku when pressing ready (R)
+- Improve rating
+- Add difficulty selection
+- Add formating for placed values
 
 # Links
 https://www.sudokuwiki.org/sudoku.htm      
