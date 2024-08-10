@@ -5,6 +5,15 @@ sudoku in terminal
 # Shelldoku generator
 sudoku generator
 
+# Build and install
+```
+git clone https://github.com/WouterServaes/Shelldoku.git
+cd Shelldoku
+mkdir build
+cd build
+cmake ..
+sudo cmake --build . --target install
+```
 
 # Libraries
 ## Sudoku Difficulty
